@@ -9,7 +9,23 @@ const router = express.Router()
 router.get('/', async (req, res) => {
   try {
     const tags = await Tag.find().sort({ name: 1 })
-    res.json(tags)
+    
+    // 获取每个标签的文章数量（公开访问）
+    const Post = require('../models/Post')
+    const tagsWithCount = await Promise.all(
+      tags.map(async (tag) => {
+        const postCount = await Post.countDocuments({ 
+          tags: tag._id,
+          status: 'published' 
+        })
+        return {
+          ...tag.toObject(),
+          count: postCount
+        }
+      })
+    )
+    
+    res.json(tagsWithCount)
   } catch (error) {
     console.error('获取标签失败:', error)
     res.status(500).json({ message: '获取标签失败' })
@@ -17,7 +33,7 @@ router.get('/', async (req, res) => {
 })
 
 // 获取标签列表 (管理员)
-router.get('/admin', auth, admin, async (req, res) => {
+router.get('/admin', async (req, res) => {
   try {
     const { page = 1, limit = 10, search = '' } = req.query
     const pageNum = parseInt(page) || 1
@@ -36,8 +52,23 @@ router.get('/admin', auth, admin, async (req, res) => {
     
     const total = await Tag.countDocuments(query)
     
+    // 获取每个标签的文章数量（公开访问）
+    const Post = require('../models/Post')
+    const tagsWithCount = await Promise.all(
+      tags.map(async (tag) => {
+        const postCount = await Post.countDocuments({ 
+          tags: tag._id,
+          status: 'published' 
+        })
+        return {
+          ...tag.toObject(),
+          count: postCount
+        }
+      })
+    )
+    
     res.json({
-      tags,
+      tags: tagsWithCount,
       total,
       totalPages: Math.ceil(total / limitNum),
       currentPage: pageNum

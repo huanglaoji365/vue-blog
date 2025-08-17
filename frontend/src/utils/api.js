@@ -34,7 +34,8 @@ api.interceptors.response.use(
       const { status } = error.response
       if (status === 401) {
         localStorage.removeItem('token')
-        window.location.href = '/login'
+        // 不强制跳转到登录页面，让组件自己处理
+        console.log('用户未登录或token已过期')
       }
       // 其它错误不弹窗
     }

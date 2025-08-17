@@ -81,21 +81,27 @@
          </div>
         
         <div class="header-right">
-          <el-dropdown @command="handleUserCommand">
-            <div class="user-info">
-              <el-avatar :size="32" :src="user?.avatar">
-                {{ user?.username?.charAt(0)?.toUpperCase() }}
-              </el-avatar>
-              <span class="username">{{ user?.username }}</span>
-              <el-icon><ArrowDown /></el-icon>
-            </div>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item command="profile">个人资料</el-dropdown-item>
-                <el-dropdown-item command="logout" divided>退出登录</el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
+          <div v-if="authStore.isAuthenticated" class="user-info">
+            <el-dropdown @command="handleUserCommand">
+              <div class="user-info">
+                <el-avatar :size="32" :src="user?.avatar">
+                  {{ user?.username?.charAt(0)?.toUpperCase() }}
+                </el-avatar>
+                <span class="username">{{ user?.username }}</span>
+                <el-icon><ArrowDown /></el-icon>
+              </div>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="profile">个人资料</el-dropdown-item>
+                  <el-dropdown-item command="logout" divided>退出登录</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+          </div>
+          <div v-else class="login-prompt">
+            <el-button type="primary" @click="$router.push('/login')">登录</el-button>
+            <el-button @click="$router.push('/register')">注册</el-button>
+          </div>
         </div>
       </div>
       
@@ -300,6 +306,12 @@ onMounted(() => {
 .username {
   font-weight: 500;
   color: #374151;
+}
+
+.login-prompt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 

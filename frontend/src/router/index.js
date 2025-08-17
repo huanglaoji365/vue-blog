@@ -118,9 +118,10 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
   
-  // 如果需要认证但用户未登录
+  // 如果需要认证但用户未登录，允许访问但显示未登录状态
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    next('/login')
+    // 不跳转到登录页，直接允许访问
+    next()
     return
   }
   
@@ -131,15 +132,15 @@ router.beforeEach(async (to, from, next) => {
       try {
         await authStore.fetchProfile()
       } catch (error) {
-        // 如果获取用户信息失败，清除 token 并跳转到登录页
+        // 如果获取用户信息失败，清除 token 但允许访问
         authStore.logout()
-        next('/login')
+        next()
         return
       }
     }
     
-    // 检查是否为管理员
-    if (!authStore.isAdmin) {
+    // 检查是否为管理员，如果不是管理员但已登录，跳转到首页
+    if (authStore.isAuthenticated && !authStore.isAdmin) {
       next('/')
       return
     }

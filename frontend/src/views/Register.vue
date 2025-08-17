@@ -148,7 +148,7 @@ const handleRegister = async () => {
 <style scoped>
 .register-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  /* background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); */
   /* padding: 40px 0; */
   padding-top: 0;
   padding-bottom: 40px;

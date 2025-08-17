@@ -15,12 +15,34 @@ router.get('/', async (req, res) => {
     const skip = (pageNum - 1) * limitNum
 
     let query = {}
-    // 如果没有指定status，则返回所有文章（管理页面）
+    // 默认只返回已发布的文章，除非指定了status参数
     if (status) {
       query.status = status
+    } else {
+      query.status = 'published'
     }
-    if (category) query.category = category
-    if (tag) query.tags = tag
+    
+    // 构建查询条件
+    if (category) {
+      query.category = category
+    }
+    
+    if (tag) {
+      // 根据标签名称查找标签ID
+      const tagDoc = await Tag.findOne({ name: { $regex: new RegExp(`^${tag}$`, 'i') } })
+      if (tagDoc) {
+        query.tags = { $in: [tagDoc._id] }
+      } else {
+        // 如果标签不存在，返回空结果
+        return res.json({
+          posts: [],
+          totalPages: 0,
+          currentPage: pageNum,
+          total: 0
+        })
+      }
+    }
+    
     if (search) {
       query.$or = [
         { title: { $regex: search, $options: 'i' } },

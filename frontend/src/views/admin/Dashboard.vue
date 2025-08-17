@@ -1,5 +1,10 @@
 <template>
   <div class="app-container">
+    <!-- 未登录提示 -->
+    <LoginPrompt v-if="!authStore.isAuthenticated" />
+    
+    <!-- 已登录内容 -->
+    <div v-else>
     <!-- 统计卡片 -->
     <el-row :gutter="20">
       <el-col :span="6">
@@ -144,16 +149,20 @@
         </el-card>
       </el-col>
     </el-row>
+    </div>
   </div>
 </template>
 
 <script setup name="Dashboard">
 import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
+import { useAuthStore } from '@/stores/auth'
 import { useStatsApi } from '@/hooks/useStatsApi'
 import { usePostsApi } from '@/hooks/usePostsApi'
 import { useCommentsApi } from '@/hooks/useCommentsApi'
+import LoginPrompt from '@/components/LoginPrompt.vue'
 
+const authStore = useAuthStore()
 const statsApi = useStatsApi();
 const postsApi = usePostsApi();
 const commentsApi = useCommentsApi();

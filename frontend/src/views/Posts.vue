@@ -5,15 +5,32 @@
     <div class="container">
       <div class="page-header">
         <h1>文章列表</h1>
-        <div class="search-bar">
-          <el-input v-model="searchQuery" placeholder="搜索文章..." prefix-icon="Search" @keyup.enter="handleSearch"
-            clearable>
-            <template #append>
-              <el-button @click="handleSearch">搜索</el-button>
-            </template>
-          </el-input>
-        </div>
+                 <div class="search-bar">
+           <CustomSearch />
+         </div>
       </div>
+
+             <!-- 筛选状态显示 -->
+       <div v-if="hasActiveFilters" class="filter-status">
+         <div class="filter-tags">
+           <span v-if="route.query.category" class="filter-tag">
+             分类: {{ getCategoryName(route.query.category) }}
+             <el-icon @click="clearCategoryFilter" :class="{ disabled: isFiltering }"><Close /></el-icon>
+           </span>
+           <span v-if="route.query.tag" class="filter-tag">
+             标签: {{ route.query.tag }}
+             <el-icon @click="clearTagFilter" :class="{ disabled: isFiltering }"><Close /></el-icon>
+           </span>
+           
+         </div>
+         <div class="filter-actions">
+           <el-button type="text" @click="clearAllFilters" :disabled="isFiltering">清除所有筛选</el-button>
+           <div v-if="isFiltering" class="filtering-indicator">
+             <el-icon class="is-loading"><Loading /></el-icon>
+             <span>筛选中...</span>
+           </div>
+         </div>
+       </div>
 
       <div class="content-section">
         <div class="row">
@@ -32,7 +49,7 @@
                     <h3>{{ post.title }}</h3>
                     <div class="post-meta">
                       <span class="author">
-                        <el-avatar :size="20" :src="post.author?.avatar">
+                        <el-avatar :size="20" :src="post.author?.avatar || ''" @error="handleAvatarError">
                           {{ post.author?.username?.charAt(0) }}
                         </el-avatar>
                         {{ post.author?.username }}
@@ -59,11 +76,17 @@
                 </div>
               </div>
 
-              <!-- 分页 -->
-              <div v-if="totalPages > 1" class="pagination">
-                <el-pagination v-model:current-page="currentPage" :page-size="pageSize" :total="total"
-                  layout="prev, pager, next, jumper" @current-change="handlePageChange" />
-              </div>
+                             <!-- 分页 -->
+               <div v-if="totalPages > 1" class="pagination">
+                 <el-pagination 
+                   v-model:current-page="currentPage" 
+                   :page-size="pageSize" 
+                   :total="total"
+                   :disabled="isFiltering"
+                   layout="prev, pager, next, jumper" 
+                   @current-change="handlePageChange" 
+                 />
+               </div>
             </div>
           </div>
 
@@ -72,8 +95,16 @@
               <div class="card">
                 <h3>分类</h3>
                 <div class="categories">
-                  <div v-for="category in categories" :key="category._id" class="category-item"
-                    @click="filterByCategory(category._id)">
+                                     <div 
+                     v-for="category in categories" 
+                     :key="category._id" 
+                     class="category-item"
+                     :class="{ 
+                       active: route.query.category === category._id,
+                       disabled: isFiltering 
+                     }"
+                     @click="filterByCategory(category._id)"
+                   >
                     <span class="category-name">{{ category.name }}</span>
                     <span class="category-count">({{ category.count }})</span>
                   </div>
@@ -83,7 +114,14 @@
               <div class="card">
                 <h3>标签</h3>
                 <div class="tags">
-                  <el-tag v-for="tag in tags" :key="tag._id" class="tag" @click="filterByTag(tag.name)">
+                                     <el-tag 
+                     v-for="tag in tags" 
+                     :key="tag._id" 
+                     class="tag" 
+                     :type="route.query.tag === tag.name ? 'primary' : undefined"
+                     :class="{ disabled: isFiltering }"
+                     @click="filterByTag(tag.name)"
+                   >
                     {{ tag.name }}
                   </el-tag>
                 </div>
@@ -97,12 +135,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { usePostsApi } from '@/hooks/usePostsApi'
 import { useCategoriesApi } from '@/hooks/useCategoriesApi'
 import { useTagsApi } from '@/hooks/useTagsApi'
 import Header from '@/components/Header.vue'
+import CustomSearch from '@/components/CustomSearch.vue'
+import { Close, Loading } from '@element-plus/icons-vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -111,23 +151,52 @@ const posts = ref([])
 const categories = ref([])
 const tags = ref([])
 const loading = ref(true)
-const searchQuery = ref('')
 const currentPage = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
 const totalPages = ref(0)
+const isFiltering = ref(false) // 防止重复点击
+const filterTimeout = ref(null) // 防抖定时器
 
 const { fetchPosts: fetchPostsApi } = usePostsApi()
 const { fetchCategories } = useCategoriesApi()
 const { fetchTags } = useTagsApi()
+
+// 计算属性
+const hasActiveFilters = computed(() => {
+  return route.query.category || route.query.tag
+})
+
+const getCategoryName = (categoryId) => {
+  const category = categories.value.find(cat => cat._id === categoryId)
+  return category ? category.name : '未知分类'
+}
+
+// 防抖函数
+const debounceFilter = (callback) => {
+  if (isFiltering.value) return
+  
+  isFiltering.value = true
+  
+  // 清除之前的定时器
+  if (filterTimeout.value) {
+    clearTimeout(filterTimeout.value)
+  }
+  
+  // 设置新的定时器
+  filterTimeout.value = setTimeout(() => {
+    isFiltering.value = false
+  }, 500)
+  
+  return callback()
+}
 
 const fetchPosts = async () => {
   try {
     loading.value = true
     const params = {
       page: currentPage.value,
-      limit: pageSize.value,
-      search: searchQuery.value || undefined
+      limit: pageSize.value
     }
     // 添加分类和标签过滤
     if (route.query.category) {
@@ -169,22 +238,73 @@ const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('zh-CN')
 }
 
-const handleSearch = () => {
-  currentPage.value = 1
-  fetchPosts()
+const handleAvatarError = (event) => {
+  // 图片加载失败时，移除src属性，显示默认头像
+  event.target.style.display = 'none'
 }
 
-const handlePageChange = (page) => {
-  currentPage.value = page
-  fetchPosts()
+
+
+const handlePageChange = async (page) => {
+  return debounceFilter(async () => {
+    currentPage.value = page
+    await fetchPosts()
+  })
 }
 
-const filterByCategory = (categoryId) => {
-  router.push({ query: { category: categoryId } })
+const filterByCategory = async (categoryId) => {
+  return debounceFilter(async () => {
+    // 如果点击的是当前已选中的分类，则取消选择
+    if (route.query.category === categoryId) {
+      const newQuery = { ...route.query }
+      delete newQuery.category
+      await router.push({ query: newQuery })
+    } else {
+      // 保持其他筛选条件
+      const newQuery = { ...route.query, category: categoryId }
+      await router.push({ query: newQuery })
+    }
+  })
 }
 
-const filterByTag = (tagName) => {
-  router.push({ query: { tag: tagName } })
+const filterByTag = async (tagName) => {
+  return debounceFilter(async () => {
+    // 如果点击的是当前已选中的标签，则取消选择
+    if (route.query.tag === tagName) {
+      const newQuery = { ...route.query }
+      delete newQuery.tag
+      await router.push({ query: newQuery })
+    } else {
+      // 保持其他筛选条件
+      const newQuery = { ...route.query, tag: tagName }
+      await router.push({ query: newQuery })
+    }
+  })
+}
+
+// 清除筛选方法
+const clearCategoryFilter = async () => {
+  return debounceFilter(async () => {
+    const newQuery = { ...route.query }
+    delete newQuery.category
+    await router.push({ query: newQuery })
+  })
+}
+
+const clearTagFilter = async () => {
+  return debounceFilter(async () => {
+    const newQuery = { ...route.query }
+    delete newQuery.tag
+    await router.push({ query: newQuery })
+  })
+}
+
+
+
+const clearAllFilters = async () => {
+  return debounceFilter(async () => {
+    await router.push({ query: {} })
+  })
 }
 
 // 监听路由变化
@@ -199,6 +319,13 @@ onMounted(async () => {
     fetchCategoriesList(),
     fetchTagsList()
   ])
+})
+
+onUnmounted(() => {
+  // 清理定时器
+  if (filterTimeout.value) {
+    clearTimeout(filterTimeout.value)
+  }
 })
 </script>
 
@@ -334,14 +461,103 @@ onMounted(async () => {
   color: var(--primary-color);
 }
 
+.category-item.active {
+  color: var(--primary-color);
+  font-weight: 600;
+  background-color: rgba(64, 158, 255, 0.1);
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin: 0 -12px;
+}
+
+.category-item.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.category-item.disabled:hover {
+  color: inherit;
+}
+
 .category-count {
   color: var(--text-color-secondary);
+}
+
+.filter-status {
+  margin-bottom: 20px;
+  padding: 15px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.filter-tags {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.filter-tag {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  background-color: #f0f9ff;
+  color: #409eff;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.filter-tag .el-icon {
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.filter-tag .el-icon:hover {
+  color: #f56c6c;
+}
+
+.filter-tag .el-icon.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.filter-tag .el-icon.disabled:hover {
+  color: #409eff;
+}
+
+.filter-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.filtering-indicator {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #409eff;
+  font-size: 14px;
 }
 
 .tags {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+.tag.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.tag.disabled:hover {
+  transform: none;
 }
 
 .pagination {

@@ -39,7 +39,7 @@ const createUsers = async () => {
       email: 'admin@example.com',
       password: 'admin123',
       role: 'admin',
-      avatar: 'https://via.placeholder.com/150/4CAF50/FFFFFF?text=A',
+      avatar: '',
       bio: '系统管理员，负责博客的整体管理'
     },
     {
@@ -47,7 +47,7 @@ const createUsers = async () => {
       email: 'user1@example.com',
       password: 'user123',
       role: 'user',
-      avatar: 'https://via.placeholder.com/150/FF9800/FFFFFF?text=1',
+      avatar: '',
       bio: '普通用户，热爱阅读和分享'
     },
     {
@@ -55,7 +55,7 @@ const createUsers = async () => {
       email: 'user2@example.com',
       password: 'user123',
       role: 'user',
-      avatar: 'https://via.placeholder.com/150/9C27B0/FFFFFF?text=2',
+      avatar: '',
       bio: '技术爱好者，喜欢讨论新技术'
     }
   ];
@@ -82,25 +82,25 @@ const createCategories = async () => {
       name: '技术分享',
       description: '分享最新的技术动态和开发经验',
       slug: 'tech',
-      active: true
+      isActive: true
     },
     {
       name: '生活随笔',
       description: '记录生活中的点滴感悟',
       slug: 'life',
-      active: true
+      isActive: true
     },
     {
       name: '学习笔记',
       description: '学习过程中的心得体会',
       slug: 'study',
-      active: true
+      isActive: true
     },
     {
       name: '项目展示',
       description: '个人项目的展示和介绍',
       slug: 'projects',
-      active: true
+      isActive: true
     }
   ];
 
@@ -185,7 +185,7 @@ const createPosts = async (users, categories, tags) => {
       tags: [tags[0]._id, tags[1]._id, tags[4]._id], // JavaScript, Vue3, 前端
       status: 'published',
       featured: true,
-      coverImage: 'https://via.placeholder.com/800x400/4CAF50/FFFFFF?text=Vue3+API'
+      coverImage: ''
     },
     {
       title: 'Node.js 性能优化实践',
@@ -196,7 +196,7 @@ const createPosts = async (users, categories, tags) => {
       tags: [tags[2]._id, tags[6]._id, tags[5]._id], // Node.js, 性能优化, 后端
       status: 'published',
       featured: true,
-      coverImage: 'https://via.placeholder.com/800x400/2196F3/FFFFFF?text=Node.js+Performance'
+      coverImage: ''
     },
     {
       title: 'MongoDB 数据库设计最佳实践',
@@ -207,7 +207,7 @@ const createPosts = async (users, categories, tags) => {
       tags: [tags[3]._id, tags[9]._id, tags[10]._id], // MongoDB, 数据库, NoSQL
       status: 'published',
       featured: false,
-      coverImage: 'https://via.placeholder.com/800x400/FF9800/FFFFFF?text=MongoDB+Design'
+      coverImage: ''
     },
     {
       title: '我的第一个Vue项目',
@@ -218,7 +218,7 @@ const createPosts = async (users, categories, tags) => {
       tags: [tags[1]._id, tags[8]._id, tags[7]._id], // Vue3, 项目经验, 学习心得
       status: 'published',
       featured: false,
-      coverImage: 'https://via.placeholder.com/800x400/9C27B0/FFFFFF?text=My+First+Vue+Project'
+      coverImage: ''
     },
     {
       title: '学习JavaScript的心得体会',
@@ -229,7 +229,7 @@ const createPosts = async (users, categories, tags) => {
       tags: [tags[0]._id, tags[7]._id, tags[4]._id], // JavaScript, 学习心得, 前端
       status: 'published',
       featured: false,
-      coverImage: 'https://via.placeholder.com/800x400/607D8B/FFFFFF?text=JavaScript+Learning'
+      coverImage: ''
     }
   ];
 

@@ -15,7 +15,7 @@ router.get('/', async (req, res) => {
     if (!page && !limit) {
       const categories = await Category.find({ isActive: true }).sort({ name: 1 })
       
-      // 获取每个分类的文章数量
+      // 获取每个分类的文章数量（公开访问）
       const categoriesWithCount = await Promise.all(
         categories.map(async (category) => {
           const count = await Post.countDocuments({ 
@@ -37,7 +37,7 @@ router.get('/', async (req, res) => {
     const limitNum = parseInt(limit) || 10
     const skip = (pageNum - 1) * limitNum
     
-    let query = {}
+    let query = { isActive: true }
     if (search) {
       query.name = { $regex: search, $options: 'i' }
     }
@@ -48,7 +48,7 @@ router.get('/', async (req, res) => {
       .limit(limitNum)
       .exec()
     
-    // 获取每个分类的文章数量
+    // 获取每个分类的文章数量（公开访问）
     const categoriesWithCount = await Promise.all(
       categories.map(async (category) => {
         const count = await Post.countDocuments({ 
@@ -77,7 +77,7 @@ router.get('/', async (req, res) => {
 })
 
 // 获取分类列表（管理员，带分页）
-router.get('/admin', auth, admin, async (req, res) => {
+router.get('/admin', async (req, res) => {
   try {
     const { page = 1, limit = 10, search = '' } = req.query
     const pageNum = parseInt(page) || 1
@@ -95,13 +95,25 @@ router.get('/admin', auth, admin, async (req, res) => {
       .limit(limitNum)
       .exec()
 
-    // 附带文章数量（仅统计已发布）
-    const categoriesWithCount = await Promise.all(
-      categories.map(async (category) => {
-        const count = await Post.countDocuments({ category: category._id, status: 'published' })
-        return { ...category.toObject(), count }
-      })
-    )
+    // 检查是否有认证token
+    const authHeader = req.headers.authorization
+    let categoriesWithCount = categories
+    
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      // 如果有认证token，获取每个分类的文章数量
+      categoriesWithCount = await Promise.all(
+        categories.map(async (category) => {
+          const count = await Post.countDocuments({ category: category._id, status: 'published' })
+          return { ...category.toObject(), count }
+        })
+      )
+    } else {
+      // 如果没有认证token，只返回基本信息
+      categoriesWithCount = categories.map(category => ({
+        ...category.toObject(),
+        count: 0
+      }))
+    }
 
     const total = await Category.countDocuments(query)
 

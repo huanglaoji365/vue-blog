@@ -1,5 +1,10 @@
 <template>
   <div class="app-container">
+    <!-- 未登录提示 -->
+    <LoginPrompt v-if="!authStore.isAuthenticated" />
+    
+    <!-- 已登录内容 -->
+    <div v-else>
     <!-- 搜索区域 -->
     <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
       <el-form-item label="文章标题" prop="title">
@@ -140,6 +145,7 @@
       v-model:limit="queryParams.pageSize"
       @pagination="getList"
     />
+    </div>
   </div>
 </template>
 
@@ -147,13 +153,16 @@
 import { ref, reactive, toRefs, getCurrentInstance, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { useAuthStore } from '@/stores/auth'
 import { usePostsApi } from '@/hooks/usePostsApi'
 import { useCategoriesApi } from '@/hooks/useCategoriesApi'
 import Pagination from '@/components/Pagination.vue'
 import RightToolbar from '@/components/RightToolbar.vue'
+import LoginPrompt from '@/components/LoginPrompt.vue'
 
 const { proxy } = getCurrentInstance();
 const router = useRouter();
+const authStore = useAuthStore();
 const postsApi = usePostsApi();
 const categoriesApi = useCategoriesApi();
 

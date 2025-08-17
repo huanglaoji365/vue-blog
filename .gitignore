@@ -1,1 +1,10 @@
 *node_modules
+check-data.js
+debug-tag-filter.js
+simple-test.js
+test-backend.js
+test-combined-filter.js
+test-fix.js
+test-js-filter.js
+clean-avatars.js
+test-categories.js

@@ -1,5 +1,10 @@
 <template>
   <div class="app-container">
+    <!-- 未登录提示 -->
+    <LoginPrompt v-if="!authStore.isAuthenticated" />
+    
+    <!-- 已登录内容 -->
+    <div v-else>
     <!-- 搜索区域 -->
     <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
       <el-form-item label="分类名称" prop="name">
@@ -103,17 +108,21 @@
         </div>
       </template>
     </el-dialog>
+    </div>
   </div>
 </template>
 
 <script setup name="Category">
 import { ref, reactive, toRefs, getCurrentInstance, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { useAuthStore } from '@/stores/auth'
 import { useCategoriesApi } from '@/hooks/useCategoriesApi'
 import Pagination from '@/components/Pagination.vue'
 import RightToolbar from '@/components/RightToolbar.vue'
+import LoginPrompt from '@/components/LoginPrompt.vue'
 
 const { proxy } = getCurrentInstance();
+const authStore = useAuthStore();
 const categoriesApi = useCategoriesApi();
 
 const categoryList = ref([]);
