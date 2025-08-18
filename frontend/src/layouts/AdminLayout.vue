@@ -1,5 +1,26 @@
 <template>
   <div class="admin-layout">
+    <!-- 未登录时显示登录提示 -->
+    <div v-if="!authStore.isAuthenticated" class="login-prompt-container">
+      <el-card class="login-prompt-card">
+        <div class="login-prompt-content">
+          <el-icon size="64" color="#409eff"><Lock /></el-icon>
+          <h2>需要登录</h2>
+          <p>您需要登录后才能访问管理后台</p>
+          <div class="login-actions">
+            <el-button type="primary" size="large" @click="$router.push('/login')">
+              立即登录
+            </el-button>
+            <el-button size="large" @click="$router.push('/register')">
+              注册账号
+            </el-button>
+          </div>
+        </div>
+      </el-card>
+    </div>
+    
+    <!-- 已登录时显示管理布局 -->
+    <template v-else>
     <!-- Left Sidebar -->
     <div class="admin-sidebar" :class="{ collapsed: sidebarCollapsed }">
              <div class="sidebar-header">
@@ -98,10 +119,7 @@
               </template>
             </el-dropdown>
           </div>
-          <div v-else class="login-prompt">
-            <el-button type="primary" @click="$router.push('/login')">登录</el-button>
-            <el-button @click="$router.push('/register')">注册</el-button>
-          </div>
+
         </div>
       </div>
       
@@ -113,6 +131,7 @@
         <router-view :key="refreshKey" />
       </div>
     </div>
+    </template>
   </div>
 </template>
 
@@ -134,7 +153,8 @@ import {
   Collection,
   ChatDotRound,
   User,
-  ArrowDown
+  ArrowDown,
+  Lock
 } from '@element-plus/icons-vue'
 
 const route = useRoute()
@@ -308,10 +328,43 @@ onMounted(() => {
   color: #374151;
 }
 
-.login-prompt {
+
+
+.login-prompt-container {
   display: flex;
+  justify-content: center;
   align-items: center;
-  gap: 8px;
+  min-height: 100vh;
+  padding: 40px;
+  background: #f0f2f5;
+}
+
+.login-prompt-card {
+  max-width: 400px;
+  width: 100%;
+}
+
+.login-prompt-content {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.login-prompt-content h2 {
+  margin: 20px 0 10px 0;
+  color: #303133;
+  font-size: 24px;
+}
+
+.login-prompt-content p {
+  margin: 0 0 30px 0;
+  color: #606266;
+  font-size: 16px;
+}
+
+.login-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
 }
 
 

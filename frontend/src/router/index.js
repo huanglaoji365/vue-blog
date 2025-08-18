@@ -118,10 +118,12 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
   
-  // 如果需要认证但用户未登录，允许访问但显示未登录状态
+  // 如果需要认证但用户未登录，立即跳转到登录页
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    // 不跳转到登录页，直接允许访问
-    next()
+    next({
+      path: '/login',
+      query: { redirect: to.fullPath }
+    })
     return
   }
   
@@ -132,9 +134,12 @@ router.beforeEach(async (to, from, next) => {
       try {
         await authStore.fetchProfile()
       } catch (error) {
-        // 如果获取用户信息失败，清除 token 但允许访问
+        // 如果获取用户信息失败，清除 token 并跳转到登录页
         authStore.logout()
-        next()
+        next({
+          path: '/login',
+          query: { redirect: to.fullPath }
+        })
         return
       }
     }

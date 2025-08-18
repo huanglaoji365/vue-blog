@@ -58,7 +58,7 @@
 
 <script setup>
 import { ref, reactive } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useAuthApi } from '@/hooks/useAuthApi'
 import { useAuthStore } from '@/stores/auth'
 import { ElMessage } from 'element-plus'
@@ -66,6 +66,7 @@ import Header from '@/components/Header.vue'
 import { nextTick } from 'vue'
 
 const router = useRouter()
+const route = useRoute()
 const loginForm = ref(null)
 const loading = ref(false)
 const { login } = useAuthApi()
@@ -99,7 +100,10 @@ const handleLogin = async () => {
     if (result.success) {
       ElMessage.success('登录成功')
       await nextTick()
-      router.push('/')
+      
+      // 如果有重定向参数，跳转到指定页面，否则跳转到首页
+      const redirectPath = route.query.redirect || '/'
+      router.push(redirectPath)
     } else {
       ElMessage.error(result.message || '登录失败')
     }
