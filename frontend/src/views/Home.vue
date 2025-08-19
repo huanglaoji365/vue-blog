@@ -164,20 +164,39 @@ onMounted(async () => {
 
 .hero-section {
   text-align: center;
-  padding: 80px 0;
-  color: white;
+  margin-top: 20px;
 }
 
 .hero-section h1 {
   font-size: 3rem;
   margin-bottom: 20px;
   font-weight: bold;
+
+  background: linear-gradient(135deg, var(--primary-color) 0%, #67c23a 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 2px 4px rgba(64, 158, 255, 0.1);
+}
+
+.hero-section h1:hover {
+  transform: scale(1.05);
+}
+
+.hero-section p:hover {
+  transform: scale(1.05);
 }
 
 .hero-section p {
   font-size: 1.2rem;
   margin-bottom: 30px;
   opacity: 0.9;
+
+  background: linear-gradient(135deg, var(--primary-color) 0%, #67c23a 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 2px 4px rgba(64, 158, 255, 0.1);
 }
 
 .content-section {

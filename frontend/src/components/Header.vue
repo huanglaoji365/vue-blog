@@ -20,12 +20,6 @@
               {{ item.label }}
             </el-menu-item>
           </el-menu>
-          <!-- 桌面端搜索栏 -->
-          <div class="page-header desktop-search" @click.stop>
-            <div class="search-bar">
-              <CustomSearch />
-            </div>
-          </div>
           <!-- 桌面端用户操作 -->
           <div class="user-actions desktop-user" @click.stop>
             <template v-if="isAuthenticated && user">
@@ -55,6 +49,12 @@
                 注册
               </el-button>
             </template>
+          </div>
+          <!-- 桌面端搜索栏 -->
+          <div class="page-header desktop-search" @click.stop>
+            <div class="search-bar" @click.stop>
+              <CustomSearch />
+            </div>
           </div>
         </div>
       </div>
@@ -91,7 +91,7 @@
               </el-avatar>
               <div class="user-info">
                 <h3>{{ user.username }}</h3>
-                <p>欢迎回来</p>
+                <span>欢迎回来</span>
               </div>
             </div>
             <div class="user-actions">
@@ -201,7 +201,7 @@ watch(route, () => {
   height: 100%;
   position: relative;
   min-height: 60px;
-  gap: 20px;
+  gap: 16px;
   flex-wrap: wrap;
 }
 
@@ -229,7 +229,7 @@ watch(route, () => {
 
 .nav-menu {
   min-width: 180px;
-  margin-left: 40px;
+  margin-left: 20px;
   border-bottom: none;
   flex-shrink: 0;
 }
@@ -279,6 +279,21 @@ watch(route, () => {
   flex-shrink: 0;
 }
 
+/* PC端用户操作区域样式 */
+.desktop-user .user-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* PC端未登录按钮样式 */
+.desktop-user .user-actions .el-button {
+  margin-left: 0;
+  flex-shrink: 0;
+}
+
 .user-info {
   display: flex;
   align-items: center;
@@ -300,16 +315,22 @@ watch(route, () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  flex: 1;
+  width: auto;
   margin: 0 20px;
   min-width: 0;
 }
 
 .search-bar {
-   width: 40%;
-   max-width: 400px;
+   width: 300px;
+   max-width: 300px;
    flex-shrink: 0;
  }
+
+/* PC端搜索栏样式 - 显示在用户信息左侧 */
+.desktop-search {
+  margin-right: 10px;
+  flex-shrink: 0;
+}
 
    /* 移动端展开/收起按钮 */
   .mobile-toggle {
@@ -689,13 +710,14 @@ watch(route, () => {
 }
 
 .user-info h3 {
+  display: block;
   margin: 0 0 4px 0;
   font-size: 18px;
   font-weight: 600;
   color: #1f2937;
 }
 
-.user-info p {
+.user-info span {
   margin: 0;
   font-size: 14px;
   color: #6b7280;
@@ -703,7 +725,6 @@ watch(route, () => {
 
 .user-actions {
   display: flex;
-  flex-direction: column;
   gap: 12px;
 }
 
@@ -769,6 +790,22 @@ watch(route, () => {
   .sidebar-user {
     padding: 16px 20px;
   }
+  
+  /* 移动端用户信息垂直排列 */
+  .user-profile {
+    align-items: flex-start;
+  }
+  
+  .user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  /* 移动端头像垂直居中 */
+  .user-profile .el-avatar {
+    align-self: center;
+  }
 }
 
 @media (max-width: 360px) {
@@ -793,6 +830,22 @@ watch(route, () => {
   .sidebar-search,
   .sidebar-user {
     padding: 14px 18px;
+  }
+  
+  /* 移动端用户信息垂直排列 */
+  .user-profile {
+    align-items: flex-start;
+  }
+  
+  .user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  /* 移动端头像垂直居中 */
+  .user-profile .el-avatar {
+    align-self: center;
   }
 }
 </style>
