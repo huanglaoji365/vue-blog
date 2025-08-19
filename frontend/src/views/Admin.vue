@@ -261,17 +261,57 @@ onActivated(() => {
 
 .stat-card {
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   padding: 24px;
   display: flex;
   align-items: center;
   gap: 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #409eff 0%, #67c23a 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 0;
+}
+
+.stat-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 12px 40px rgba(64, 158, 255, 0.25);
+  border-color: #409eff;
+}
+
+.stat-card:hover::before {
+  opacity: 0.05;
+}
+
+.stat-card > * {
+  position: relative;
+  z-index: 1;
 }
 
 .stat-icon {
   color: var(--primary-color);
   flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover .stat-icon {
+  transform: scale(1.2) rotate(5deg);
+  color: #409eff;
+  filter: drop-shadow(0 4px 8px rgba(64, 158, 255, 0.3));
 }
 
 .stat-number {
@@ -279,6 +319,13 @@ onActivated(() => {
   font-weight: bold;
   color: var(--text-color);
   line-height: 1;
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover .stat-number {
+  color: #409eff;
+  transform: scale(1.1);
+  text-shadow: 0 2px 4px rgba(64, 158, 255, 0.2);
 }
 
 .stat-label {
@@ -289,19 +336,45 @@ onActivated(() => {
 
 .management-card {
   cursor: pointer;
-  transition: all 0.3s ease;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   padding: 20px;
   display: flex;
   align-items: center;
   gap: 15px;
   background-color: white;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.management-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #409eff 0%, #67c23a 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 0;
 }
 
 .management-card:hover {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  transform: translateY(-2px);
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 12px 40px rgba(64, 158, 255, 0.25);
+  border-color: #409eff;
+}
+
+.management-card:hover::before {
+  opacity: 0.05;
+}
+
+.management-card > * {
+  position: relative;
+  z-index: 1;
 }
 
 .card-content h3 {
@@ -309,6 +382,12 @@ onActivated(() => {
   color: var(--text-color);
   font-size: 1.1rem;
   font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.management-card:hover .card-content h3 {
+  color: #409eff;
+  transform: translateX(4px);
 }
 
 .card-content p {
@@ -321,6 +400,13 @@ onActivated(() => {
   color: var(--primary-color);
   font-size: 2.5rem;
   flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.management-card:hover .card-icon {
+  transform: scale(1.2) rotate(5deg);
+  color: #409eff;
+  filter: drop-shadow(0 4px 8px rgba(64, 158, 255, 0.3));
 }
 
 @media (max-width: 768px) {

@@ -186,6 +186,7 @@ const handleRegister = async () => {
   width: 100%;
   height: 40px;
   font-size: 16px;
+  margin-left: 0;
 }
 
 .register-footer {

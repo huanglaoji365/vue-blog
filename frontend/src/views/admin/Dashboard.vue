@@ -184,7 +184,18 @@ const systemInfo = ref({
 const fetchStats = async () => {
   try {
     const response = await statsApi.getStats()
-    stats.value = response.data
+    const data = response.data
+    
+    // 更新统计数据，使用新的数据结构
+    stats.value = {
+      posts: data.overview.totalPosts || 0,
+      users: data.overview.totalUsers || 0,
+      comments: data.overview.totalComments || 0,
+      views: data.overview.totalViews || 0
+    }
+    
+    // 可以在这里添加更多统计数据的处理
+    console.log('统计数据:', data)
   } catch (error) {
     console.error('获取统计数据失败:', error)
   }

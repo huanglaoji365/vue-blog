@@ -13,6 +13,7 @@ const categoryRoutes = require('./routes/categories')
 const tagRoutes = require('./routes/tags')
 const userRoutes = require('./routes/users')
 const uploadRoutes = require('./routes/upload')
+const statsRoutes = require('./routes/stats')
 
 const app = express()
 const PORT = process.env.PORT || 3000
@@ -45,6 +46,7 @@ app.use('/api/categories', categoryRoutes)
 app.use('/api/tags', tagRoutes)
 app.use('/api/users', userRoutes)
 app.use('/api/upload', uploadRoutes)
+app.use('/api/admin/stats', statsRoutes)
 
 // 静态文件服务
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')))

@@ -4,89 +4,90 @@
 
     <div class="container">
       <div class="page-header">
-        <h1>文章列表</h1>
-                 <div class="search-bar">
-           <CustomSearch />
-         </div>
+        <div class="search-bar">
+        </div>
       </div>
 
-             <!-- 筛选状态显示 -->
-       <div v-if="hasActiveFilters" class="filter-status">
-         <div class="filter-tags">
-           <span v-if="route.query.category" class="filter-tag">
-             分类: {{ getCategoryName(route.query.category) }}
-             <el-icon @click="clearCategoryFilter" :class="{ disabled: isFiltering }"><Close /></el-icon>
-           </span>
-           <span v-if="route.query.tag" class="filter-tag">
-             标签: {{ route.query.tag }}
-             <el-icon @click="clearTagFilter" :class="{ disabled: isFiltering }"><Close /></el-icon>
-           </span>
-           
-         </div>
-         <div class="filter-actions">
-           <el-button type="text" @click="clearAllFilters" :disabled="isFiltering">清除所有筛选</el-button>
-           <div v-if="isFiltering" class="filtering-indicator">
-             <el-icon class="is-loading"><Loading /></el-icon>
-             <span>筛选中...</span>
-           </div>
-         </div>
-       </div>
+      <!-- 筛选状态显示 -->
+      <div v-if="hasActiveFilters" class="filter-status">
+        <div class="filter-tags">
+          <span v-if="route.query.category" class="filter-tag">
+            分类: {{ getCategoryName(route.query.category) }}
+            <el-icon @click="clearCategoryFilter" :class="{ disabled: isFiltering }">
+              <Close />
+            </el-icon>
+          </span>
+          <span v-if="route.query.tag" class="filter-tag">
+            标签: {{ route.query.tag }}
+            <el-icon @click="clearTagFilter" :class="{ disabled: isFiltering }">
+              <Close />
+            </el-icon>
+          </span>
+
+        </div>
+        <div class="filter-actions">
+          <el-button type="text" @click="clearAllFilters" :disabled="isFiltering">清除所有筛选</el-button>
+          <div v-if="isFiltering" class="filtering-indicator">
+            <el-icon class="is-loading">
+              <Loading />
+            </el-icon>
+            <span>筛选中...</span>
+          </div>
+        </div>
+      </div>
 
       <div class="content-section">
         <div class="row">
           <div class="col-md-8">
-            <div class="posts-list">
-              <div v-if="loading" class="loading">
-                <el-skeleton :rows="3" animated v-for="i in 5" :key="i" />
-              </div>
-              <div v-else-if="posts.length === 0" class="empty">
-                <el-empty description="暂无文章" />
-              </div>
-              <div v-else>
-                <div v-for="post in posts" :key="post._id" class="post-card"
-                  @click="$router.push(`/posts/${post._id}`)">
-                  <div class="post-header">
-                    <h3>{{ post.title }}</h3>
-                    <div class="post-meta">
-                      <span class="author">
-                        <el-avatar :size="20" :src="post.author?.avatar || ''" @error="handleAvatarError">
-                          {{ post.author?.username?.charAt(0) }}
-                        </el-avatar>
-                        {{ post.author?.username }}
-                      </span>
-                      <span class="date">{{ formatDate(post.createdAt) }}</span>
-                      <span class="views">{{ post.views }} 阅读</span>
+            <div class="card">
+              <h2>文章列表</h2>
+              <div class="posts-list">
+                <div v-if="loading" class="loading">
+                  <el-skeleton :rows="3" animated v-for="i in 5" :key="i" />
+                </div>
+                <div v-else-if="posts.length === 0" class="empty">
+                  <el-empty description="暂无文章" />
+                </div>
+                <div v-else>
+                  <div v-for="post in posts" :key="post._id" class="post-card"
+                    @click="$router.push(`/posts/${post._id}`)">
+                    <div class="post-header">
+                      <h3>{{ post.title }}</h3>
+                      <div class="post-meta">
+                        <span class="author">
+                          <el-avatar :size="20" :src="post.author?.avatar || ''" @error="handleAvatarError">
+                            {{ post.author?.username?.charAt(0) }}
+                          </el-avatar>
+                          {{ post.author?.username }}
+                        </span>
+                        <span class="date">{{ formatDate(post.createdAt) }}</span>
+                        <span class="views">{{ post.views }} 阅读</span>
+                      </div>
                     </div>
-                  </div>
 
-                  <p class="post-excerpt">{{ post.excerpt }}</p>
+                    <p class="post-excerpt">{{ post.excerpt }}</p>
 
-                  <div class="post-footer">
-                    <div class="tags">
-                      <el-tag v-for="tag in post.tags" :key="tag._id || tag" size="small" class="tag">
-                        {{ tag.name || tag }}
-                      </el-tag>
-                    </div>
-                    <div class="category" v-if="post.category">
-                      <el-tag type="info" size="small">
-                        {{ post.category.name }}
-                      </el-tag>
+                    <div class="post-footer">
+                      <div class="tags">
+                        <el-tag v-for="tag in post.tags" :key="tag._id || tag" size="small" class="tag">
+                          {{ tag.name || tag }}
+                        </el-tag>
+                      </div>
+                      <div class="category" v-if="post.category">
+                        <el-tag type="info" size="small">
+                          {{ post.category.name }}
+                        </el-tag>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-                             <!-- 分页 -->
-               <div v-if="totalPages > 1" class="pagination">
-                 <el-pagination 
-                   v-model:current-page="currentPage" 
-                   :page-size="pageSize" 
-                   :total="total"
-                   :disabled="isFiltering"
-                   layout="prev, pager, next, jumper" 
-                   @current-change="handlePageChange" 
-                 />
-               </div>
+                <!-- 分页 -->
+                <div v-if="totalPages > 1" class="pagination">
+                  <el-pagination v-model:current-page="currentPage" :page-size="pageSize" :total="total"
+                    :disabled="isFiltering" layout="prev, pager, next, jumper" @current-change="handlePageChange" />
+                </div>
+              </div>
             </div>
           </div>
 
@@ -95,16 +96,10 @@
               <div class="card">
                 <h3>分类</h3>
                 <div class="categories">
-                                     <div 
-                     v-for="category in categories" 
-                     :key="category._id" 
-                     class="category-item"
-                     :class="{ 
-                       active: route.query.category === category._id,
-                       disabled: isFiltering 
-                     }"
-                     @click="filterByCategory(category._id)"
-                   >
+                  <div v-for="category in categories" :key="category._id" class="category-item" :class="{
+                    active: route.query.category === category._id,
+                    disabled: isFiltering
+                  }" @click="filterByCategory(category._id)">
                     <span class="category-name">{{ category.name }}</span>
                     <span class="category-count">({{ category.count }})</span>
                   </div>
@@ -114,14 +109,9 @@
               <div class="card">
                 <h3>标签</h3>
                 <div class="tags">
-                                     <el-tag 
-                     v-for="tag in tags" 
-                     :key="tag._id" 
-                     class="tag" 
-                     :type="route.query.tag === tag.name ? 'primary' : undefined"
-                     :class="{ disabled: isFiltering }"
-                     @click="filterByTag(tag.name)"
-                   >
+                  <el-tag v-for="tag in tags" :key="tag._id" class="tag"
+                    :type="route.query.tag === tag.name ? 'primary' : undefined" :class="{ disabled: isFiltering }"
+                    @click="filterByTag(tag.name)">
                     {{ tag.name }}
                   </el-tag>
                 </div>
@@ -141,7 +131,6 @@ import { usePostsApi } from '@/hooks/usePostsApi'
 import { useCategoriesApi } from '@/hooks/useCategoriesApi'
 import { useTagsApi } from '@/hooks/useTagsApi'
 import Header from '@/components/Header.vue'
-import CustomSearch from '@/components/CustomSearch.vue'
 import { Close, Loading } from '@element-plus/icons-vue'
 
 const route = useRoute()
@@ -175,19 +164,19 @@ const getCategoryName = (categoryId) => {
 // 防抖函数
 const debounceFilter = (callback) => {
   if (isFiltering.value) return
-  
+
   isFiltering.value = true
-  
+
   // 清除之前的定时器
   if (filterTimeout.value) {
     clearTimeout(filterTimeout.value)
   }
-  
+
   // 设置新的定时器
   filterTimeout.value = setTimeout(() => {
     isFiltering.value = false
   }, 500)
-  
+
   return callback()
 }
 
@@ -581,13 +570,13 @@ onUnmounted(() => {
   .row {
     flex-direction: column;
   }
-  
+
   .page-header {
     flex-direction: column;
     gap: 20px;
     align-items: stretch;
   }
-  
+
   .search-bar {
     width: 100%;
   }

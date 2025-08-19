@@ -145,7 +145,9 @@ const closeSelectedTag = (view) => {
 // 处理右键点击
 const handleRightClick = (event, tag) => {
   event.preventDefault()
-  event.stopPropagation()
+  if (event.stopPropagation && typeof event.stopPropagation === 'function') {
+    event.stopPropagation()
+  }
   currentRightClickTag.value = tag
   contextMenuVisible.value = true
   

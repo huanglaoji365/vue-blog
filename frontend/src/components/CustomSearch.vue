@@ -16,116 +16,118 @@
       </div>
     </div>
 
-    <!-- 搜索模态框 -->
-    <div v-if="isOpen" class="search-modal-overlay" @click="closeSearch">
-      <div class="search-modal" @click.stop>
-        <!-- 搜索输入框 -->
-        <div class="search-input-container">
-          <el-icon class="search-input-icon"><Search /></el-icon>
-          <input
-            ref="searchInput"
-            v-model="searchQuery"
-            type="text"
-            class="search-input"
-            :placeholder="placeholder"
-            @input="handleSearch"
-            @keydown="handleKeydown"
-            @focus="handleFocus"
-          />
-          <button 
-            v-if="searchQuery" 
-            class="clear-button"
-            @click="clearSearch"
-          >
-            <el-icon><Close /></el-icon>
-          </button>
-          <!-- <button class="close-button" @click="closeSearch">
-            <el-icon><Close /></el-icon>
-          </button> -->
-        </div>
-
-        <!-- 搜索结果 -->
-        <div class="search-results" v-if="searchQuery">
-          <div v-if="loading" class="loading-results">
-            <el-icon class="is-loading"><Loading /></el-icon>
-            <span>搜索中...</span>
-          </div>
-          
-          <div v-else-if="searchResults.length === 0" class="no-results">
-            <div class="no-results-icon">
-              <el-icon><Search /></el-icon>
-            </div>
-            <div class="no-results-text">
-              <p>没有找到相关结果</p>
-              <p class="no-results-suggestion">尝试使用不同的关键词</p>
-            </div>
-          </div>
-          
-          <div v-else class="results-list">
-            <div 
-              v-for="(result, index) in searchResults" 
-              :key="result._id"
-              class="result-item"
-              :class="{ 'result-item-active': activeIndex === index }"
-              @click="selectResult(result)"
-              @mouseenter="activeIndex = index"
+    <!-- 搜索模态框 - 使用 teleport 移到 body 层级 -->
+    <teleport to="body">
+      <div v-if="isOpen" class="search-modal-overlay" @click="closeSearch">
+        <div class="search-modal" @click.stop>
+          <!-- 搜索输入框 -->
+          <div class="search-input-container">
+            <el-icon class="search-input-icon"><Search /></el-icon>
+            <input
+              ref="searchInput"
+              v-model="searchQuery"
+              type="text"
+              class="search-input"
+              :placeholder="placeholder"
+              @input="handleSearch"
+              @keydown="handleKeydown"
+              @focus="handleFocus"
+            />
+            <button 
+              v-if="searchQuery" 
+              class="clear-button"
+              @click="clearSearch"
             >
-              <div class="result-content">
-                <div class="result-title">
-                  <span v-html="highlightText(result.title, searchQuery)"></span>
+              <el-icon><Close /></el-icon>
+            </button>
+            <!-- <button class="close-button" @click="closeSearch">
+              <el-icon><Close /></el-icon>
+            </button> -->
+          </div>
+
+          <!-- 搜索结果 -->
+          <div class="search-results" v-if="searchQuery">
+            <div v-if="loading" class="loading-results">
+              <el-icon class="is-loading"><Loading /></el-icon>
+              <span>搜索中...</span>
+            </div>
+            
+            <div v-else-if="searchResults.length === 0" class="no-results">
+              <div class="no-results-icon">
+                <el-icon><Search /></el-icon>
+              </div>
+              <div class="no-results-text">
+                <p>没有找到相关结果</p>
+                <p class="no-results-suggestion">尝试使用不同的关键词</p>
+              </div>
+            </div>
+            
+            <div v-else class="results-list">
+              <div 
+                v-for="(result, index) in searchResults" 
+                :key="result._id"
+                class="result-item"
+                :class="{ 'result-item-active': activeIndex === index }"
+                @click="selectResult(result)"
+                @mouseenter="activeIndex = index"
+              >
+                <div class="result-content">
+                  <div class="result-title">
+                    <span v-html="highlightText(result.title, searchQuery)"></span>
+                  </div>
+                  <div class="result-excerpt">
+                    <span v-html="highlightText(result.excerpt, searchQuery)"></span>
+                  </div>
+                  <div class="result-meta">
+                    <span class="result-author">{{ result.author?.username }}</span>
+                    <span class="result-date">{{ formatDate(result.createdAt) }}</span>
+                    <span class="result-category" v-if="result.category">
+                      {{ result.category.name }}
+                    </span>
+                  </div>
                 </div>
-                <div class="result-excerpt">
-                  <span v-html="highlightText(result.excerpt, searchQuery)"></span>
-                </div>
-                <div class="result-meta">
-                  <span class="result-author">{{ result.author?.username }}</span>
-                  <span class="result-date">{{ formatDate(result.createdAt) }}</span>
-                  <span class="result-category" v-if="result.category">
-                    {{ result.category.name }}
-                  </span>
+                <div class="result-actions">
+                  <el-icon class="result-action-icon"><ArrowRight /></el-icon>
                 </div>
               </div>
-              <div class="result-actions">
-                <el-icon class="result-action-icon"><ArrowRight /></el-icon>
+            </div>
+          </div>
+
+          <!-- 搜索提示 -->
+          <div v-else class="search-tips">
+            <div class="tips-header">
+              <h3>搜索提示</h3>
+            </div>
+            <div class="tips-content">
+              <div class="tip-item">
+                <el-icon class="tip-icon"><Search /></el-icon>
+                <span>输入关键词搜索文章标题、摘要和内容</span>
+              </div>
+              <div class="tip-item">
+                <el-icon class="tip-icon"><User /></el-icon>
+                <span>可以搜索作者名称</span>
+              </div>
+              <div class="tip-item">
+                <el-icon class="tip-icon"><Collection /></el-icon>
+                <span>可以搜索分类和标签</span>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- 搜索提示 -->
-        <div v-else class="search-tips">
-          <div class="tips-header">
-            <h3>搜索提示</h3>
-          </div>
-          <div class="tips-content">
-            <div class="tip-item">
-              <el-icon class="tip-icon"><Search /></el-icon>
-              <span>输入关键词搜索文章标题、摘要和内容</span>
+          <!-- 搜索底部 -->
+          <div class="search-footer">
+            <div class="search-info">
+              <span v-if="searchQuery && !loading">
+                找到 {{ searchResults.length }} 个结果
+              </span>
             </div>
-            <div class="tip-item">
-              <el-icon class="tip-icon"><User /></el-icon>
-              <span>可以搜索作者名称</span>
+            <div class="search-actions">
+              <span class="action-hint">使用 ↑↓ 键导航，Enter 键选择，Esc 键关闭</span>
             </div>
-            <div class="tip-item">
-              <el-icon class="tip-icon"><Collection /></el-icon>
-              <span>可以搜索分类和标签</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- 搜索底部 -->
-        <div class="search-footer">
-          <div class="search-info">
-            <span v-if="searchQuery && !loading">
-              找到 {{ searchResults.length }} 个结果
-            </span>
-          </div>
-          <div class="search-actions">
-            <span class="action-hint">使用 ↑↓ 键导航，Enter 键选择，Esc 键关闭</span>
           </div>
         </div>
       </div>
-    </div>
+    </teleport>
   </div>
 </template>
 
@@ -280,9 +282,29 @@ onUnmounted(() => {
 })
 </script>
 
-<style scoped>
+<style>
 .custom-search-container {
   position: relative;
+  z-index: auto;
+}
+
+/* 搜索模态框覆盖层 - 使用 teleport 后不再需要复杂的样式覆盖 */
+.search-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transition: all 0.3s ease;
 }
 
 /* 搜索按钮 */
@@ -290,35 +312,37 @@ onUnmounted(() => {
   width: 100%;
   height: 40px;
   border: 1px solid #dcdfe6;
-  border-radius: 6px;
+  border-radius: 8px;
   background: white;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   user-select: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .search-button:hover {
   border-color: #409eff;
-  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.1);
+  box-shadow: 0 4px 16px rgba(64, 158, 255, 0.15);
+  transform: translateY(-1px);
 }
 
 .search-button-active {
   border-color: #409eff;
-  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.1);
+  box-shadow: 0 4px 16px rgba(64, 158, 255, 0.15);
 }
 
 .search-button-content {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 12px;
+  padding: 0 16px;
   height: 100%;
 }
 
 .search-icon {
   color: #909399;
   font-size: 16px;
-  margin-right: 8px;
+  margin-right: 10px;
 }
 
 .search-placeholder {
@@ -326,6 +350,7 @@ onUnmounted(() => {
   text-align: left;
   color: #606266;
   font-size: 14px;
+  font-weight: 400;
 }
 
 .search-shortcuts {
@@ -340,44 +365,58 @@ onUnmounted(() => {
   min-width: 20px;
   height: 20px;
   padding: 0 4px;
-  background: #f5f7fa;
-  border: 1px solid #dcdfe6;
-  border-radius: 3px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
   font-size: 11px;
   font-weight: 500;
-  color: #606266;
+  color: #64748b;
   line-height: 1;
+  transition: all 0.2s ease;
 }
 
-/* 搜索模态框 */
-.search-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 9999;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding-top: 10vh;
+/* 搜索模态框样式已在上方定义 */
+
+.search-modal-overlay:hover {
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.search-modal-overlay:active {
+  background: rgba(0, 0, 0, 0.55);
 }
 
 .search-modal {
   width: 90%;
   max-width: 600px;
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  border-radius: 16px;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1);
   overflow: hidden;
-  animation: modalSlideIn 0.2s ease-out;
+  animation: modalSlideIn 0.3s ease-out;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  z-index: 100000 !important;
+}
+
+.search-modal::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 16px;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05));
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
 }
 
 @keyframes modalSlideIn {
   from {
     opacity: 0;
-    transform: translateY(-20px) scale(0.95);
+    transform: translateY(-30px) scale(0.9);
   }
   to {
     opacity: 1;
@@ -389,9 +428,10 @@ onUnmounted(() => {
 .search-input-container {
   display: flex;
   align-items: center;
-  padding: 16px 20px;
+  padding: 20px 24px;
   border-bottom: 1px solid #f0f0f0;
   position: relative;
+  background: #fafafa;
 }
 
 .search-input-icon {
@@ -404,9 +444,10 @@ onUnmounted(() => {
   flex: 1;
   border: none;
   outline: none;
-  font-size: 16px;
+  font-size: 18px;
   color: #303133;
   background: transparent;
+  font-weight: 500;
 }
 
 .search-input::placeholder {
@@ -612,9 +653,11 @@ onUnmounted(() => {
   .search-modal {
     width: 95%;
     margin: 0 10px;
+    max-height: 90vh;
   }
   
   .search-modal-overlay {
+    align-items: flex-start;
     padding-top: 5vh;
   }
   
@@ -627,5 +670,62 @@ onUnmounted(() => {
   .search-shortcuts {
     display: none;
   }
+  
+  .search-input {
+    font-size: 16px;
+  }
+  
+  .search-input-container {
+    padding: 16px 20px;
+  }
+}
+
+/* 小屏幕优化 */
+@media (max-width: 480px) {
+  .search-modal {
+    width: 98%;
+    margin: 0 5px;
+    max-height: 85vh;
+    z-index: 999999 !important;
+  }
+  
+  .search-modal-overlay {
+    padding-top: 3vh;
+  }
+  
+  .search-input {
+    font-size: 16px;
+  }
+  
+  .search-input-container {
+    padding: 14px 16px;
+  }
+}
+
+/* 超小屏幕优化 */
+@media (max-width: 360px) {
+  .search-modal {
+    width: 100%;
+    margin: 0;
+    max-height: 80vh;
+  }
+  
+  .search-modal-overlay {
+    padding-top: 2vh;
+  }
+  
+  .search-input {
+    font-size: 15px;
+  }
+  
+  .search-input-container {
+    padding: 12px 14px;
+  }
+}
+
+/* 搜索模态框样式 */
+.search-modal {
+  z-index: 10000;
+  position: relative;
 }
 </style>
