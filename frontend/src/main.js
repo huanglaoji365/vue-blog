@@ -1,6 +1,7 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import ElementPlus from 'element-plus'
+import GlobalUEditor from '@/components/GlobalUEditor.vue';
 import 'element-plus/dist/index.css'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import App from './App.vue'
@@ -15,6 +16,8 @@ const pinia = createPinia() // 确保唯一
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
   app.component(key, component)
 }
+
+app.component('GlobalUEditor', GlobalUEditor); // 注册为全局组件
 
 app.use(pinia)
 app.use(router)

@@ -1,76 +1,45 @@
 <template>
   <div class="create-post-page">
     <div class="container">
-      <div class="page-header">
+      <!-- <div class="page-header">
         <h1>新建文章</h1>
         <div class="header-actions">
           <el-button @click="$router.push('/admin/posts')">返回列表</el-button>
         </div>
-      </div>
-      
+      </div> -->
+
       <div class="content-section">
-        <el-form 
-          ref="postFormRef" 
-          :model="postForm" 
-          :rules="postRules" 
-          label-width="100px"
-          class="post-form"
-        >
+        <el-form ref="postFormRef" :model="postForm" :rules="postRules" label-width="100px" class="post-form">
           <el-form-item label="标题" prop="title">
             <el-input v-model="postForm.title" placeholder="请输入文章标题" />
           </el-form-item>
-          
+
           <el-form-item label="摘要" prop="excerpt">
-            <el-input 
-              v-model="postForm.excerpt" 
-              type="textarea" 
-              :rows="3"
-              placeholder="请输入文章摘要"
-            />
+            <el-input v-model="postForm.excerpt" type="textarea" :rows="3" placeholder="请输入文章摘要" />
           </el-form-item>
-          
+
           <el-form-item label="分类" prop="category">
             <el-select v-model="postForm.category" placeholder="选择分类" clearable>
-              <el-option 
-                v-for="category in categories" 
-                :key="category._id" 
-                :label="category.name" 
-                :value="category._id"
-              />
+              <el-option v-for="category in categories" :key="category._id" :label="category.name"
+                :value="category._id" />
             </el-select>
           </el-form-item>
-          
+
           <el-form-item label="标签" prop="tags">
-            <el-select 
-              v-model="postForm.tags" 
-              multiple 
-              filterable 
-              placeholder="选择标签"
-              style="width: 100%"
-            >
-              <el-option 
-                v-for="tag in tags" 
-                :key="tag._id" 
-                :label="tag.name" 
-                :value="tag._id"
-              />
+            <el-select v-model="postForm.tags" multiple filterable placeholder="选择标签" style="width: 100%">
+              <el-option v-for="tag in tags" :key="tag._id" :label="tag.name" :value="tag._id" />
             </el-select>
           </el-form-item>
-          
+
           <el-form-item label="封面图片" prop="coverImage">
             <div class="image-upload-container">
-              <el-upload
-                class="image-uploader"
-                :show-file-list="false"
-                :before-upload="beforeImageUpload"
-                :on-success="handleImageSuccess"
-                :on-error="handleImageError"
-                action="/api/upload"
-                accept="image/*"
-                name="file"
-              >
+              <el-upload class="image-uploader" :show-file-list="false" :before-upload="beforeImageUpload"
+                :on-success="handleImageSuccess" :on-error="handleImageError" action="/api/upload" accept="image/*"
+                name="file" :headers="uploadHeaders">
                 <img v-if="postForm.coverImage" :src="postForm.coverImage" class="uploaded-image" />
-                <el-icon v-else class="image-uploader-icon"><Plus /></el-icon>
+                <el-icon v-else class="image-uploader-icon">
+                  <Plus />
+                </el-icon>
               </el-upload>
               <div class="upload-tips">
                 <p>支持 JPG、PNG、GIF 格式，文件大小不超过 2MB</p>
@@ -80,20 +49,20 @@
               </div>
             </div>
           </el-form-item>
-          
+
           <el-form-item label="状态" prop="status">
             <el-radio-group v-model="postForm.status">
               <el-radio label="draft">草稿</el-radio>
               <el-radio label="published">发布</el-radio>
             </el-radio-group>
           </el-form-item>
-          
+
           <el-form-item label="推荐" prop="featured">
             <el-switch v-model="postForm.featured" />
           </el-form-item>
-          
+
           <el-form-item label="内容" prop="content">
-            <div class="editor-container">
+            <!-- <div class="editor-container">
               <textarea 
                 v-model="postForm.content" 
                 class="markdown-editor"
@@ -104,9 +73,19 @@
                 <h4>预览</h4>
                 <div class="markdown-preview" v-html="renderedContent"></div>
               </div>
+            </div> -->
+            <div>
+              <GlobalUEditor v-model="postForm.content" :localConfig="{ initialFrameHeight: 300 }" :editorStyle="{
+                height: '545px',
+                width: '630px',
+                border: '1px solid #ddd',
+                borderRadius: '4px'
+              }" />
+              <!-- <vue-ueditor-wrap v-model="postForm.content" editor-id="editor" :config="editorConfig"
+                :editorDependencies="['ueditor.config.js', 'ueditor.all.js']" style="height:500px; width: 630px;" /> -->
             </div>
           </el-form-item>
-          
+
           <el-form-item>
             <el-button type="primary" @click="savePost" :loading="saving">
               创建文章
@@ -206,17 +185,23 @@ const removeImage = () => {
   ElMessage.success('图片已删除')
 }
 
+// 上传鉴权头
+const uploadHeaders = computed(() => {
+  const token = localStorage.getItem('token')
+  return token ? { Authorization: `Bearer ${token}` } : {}
+})
+
 const savePost = async () => {
   if (!postFormRef.value) return
-  
+
   try {
     await postFormRef.value.validate()
     saving.value = true
-    
+
     const postData = {
       ...postForm.value
     }
-    
+
     await api.post('/posts', postData)
     ElMessage.success('文章创建成功')
     router.push('/admin/posts')
@@ -400,13 +385,13 @@ onMounted(async () => {
   .editor-container {
     flex-direction: column;
   }
-  
+
   .page-header {
     flex-direction: column;
     gap: 20px;
     align-items: stretch;
   }
-  
+
   .post-form {
     margin: 0 20px;
     padding: 20px;
