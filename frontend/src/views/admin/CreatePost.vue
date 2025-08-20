@@ -76,8 +76,8 @@
             </div> -->
             <div>
               <GlobalUEditor v-model="postForm.content" :localConfig="{ initialFrameHeight: 300 }" :editorStyle="{
-                height: '545px',
-                width: '630px',
+                maxHeight: '545px',
+                maxWidth: '630px',
                 border: '1px solid #ddd',
                 borderRadius: '4px'
               }" />
