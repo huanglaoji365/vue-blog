@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <Header />
-    
+
     <div class="container">
       <div class="hero-section">
         <h1>欢迎来到 WeBlog</h1>
@@ -10,7 +10,7 @@
           浏览文章
         </el-button> -->
       </div>
-      
+
       <div class="content-section">
         <div class="row">
           <div class="col-md-8">
@@ -23,14 +23,14 @@
                 <el-empty description="暂无文章" />
               </div>
               <div v-else class="posts-list">
-                <div
-                  v-for="post in posts"
-                  :key="post._id"
-                  class="post-item"
-                  @click="$router.push(`/posts/${post._id}`)"
-                >
+                <div v-for="post in posts" :key="post._id" class="post-item"
+                  @click="$router.push(`/posts/${post._id}`)">
                   <h3>{{ post.title }}</h3>
-                  <p class="post-excerpt">{{ post.excerpt }}</p>
+                  <!-- <p class="post-excerpt">{{ post.excerpt }}</p> -->
+                  <div class="item-img">
+                    <img v-lazy="'http://localhost:5173' + post.coverImage" :alt="post.title" />
+                    <!-- <img :src="'https://liuzepeng.com/' + item.pic" :alt="item.title" /> -->
+                  </div>
                   <div class="post-meta">
                     <el-avatar :size="32" :src="post.author?.avatar">
                       {{ post.author?.username?.charAt(0) }}
@@ -38,12 +38,7 @@
                     <span class="author">{{ post.author?.username }}</span>
                     <span class="date">{{ formatDate(post.createdAt) }}</span>
                     <span class="tags">
-                      <el-tag
-                        v-for="tag in post.tags"
-                        :key="tag._id || tag"
-                        size="small"
-                        class="tag"
-                      >
+                      <el-tag v-for="tag in post.tags" :key="tag._id || tag" size="small" class="tag">
                         {{ tag.name || tag }}
                       </el-tag>
                     </span>
@@ -52,32 +47,23 @@
               </div>
             </div>
           </div>
-          
+
           <div class="col-md-4">
             <div class="card">
               <h3>分类</h3>
               <div class="categories">
-                <div
-                  v-for="category in categories"
-                  :key="category._id"
-                  class="category-item"
-                  @click="filterByCategory(category._id)"
-                >
+                <div v-for="category in categories" :key="category._id" class="category-item"
+                  @click="filterByCategory(category._id)">
                   <span class="category-name">{{ category.name }}</span>
                   <span class="category-count">({{ category.count }})</span>
                 </div>
               </div>
             </div>
-            
+
             <div class="card">
               <h3>标签</h3>
               <div class="tags">
-                <el-tag
-                  v-for="tag in tags"
-                  :key="tag._id"
-                  class="tag"
-                  @click="filterByTag(tag.name)"
-                >
+                <el-tag v-for="tag in tags" :key="tag._id" class="tag" @click="filterByTag(tag.name)">
                   {{ tag.name }}
                 </el-tag>
               </div>
@@ -307,17 +293,97 @@ onMounted(async () => {
   text-align: center;
 }
 
+.item-img {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-height: 300px;
+  min-height: 200px;
+  cursor: pointer;
+  overflow: hidden;
+  border-radius: 12px;
+  position: relative;
+}
+
+.item-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: all 0.5s ease-out 0.1s;
+}
+
+
+.item-img:hover img {
+  transform: scale(1.1);
+}
+
+@media not screen and (min-width: 60em) {
+  .item-img {
+    max-height: 300px;
+    min-height: 200px;
+  }
+}
+
+@media not screen and (min-width: 50em) {
+  .item-img {
+    max-height: 250px;
+    min-height: 180px;
+  }
+}
+
 @media (max-width: 768px) {
+  .item-img {
+    max-height: 200px;
+    min-height: 150px;
+    width: 100%;
+  }
+
+  .item-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
   .row {
     flex-direction: column;
   }
-  
+
   .hero-section h1 {
     font-size: 2rem;
   }
-  
+
   .hero-section p {
     font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .item-img {
+    max-height: 180px;
+    min-height: 120px;
+  }
+  
+  .hero-section h1 {
+    font-size: 1.8rem;
+  }
+  
+  .hero-section p {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .item-img {
+    max-height: 150px;
+    min-height: 100px;
+  }
+  
+  .hero-section h1 {
+    font-size: 1.5rem;
+  }
+  
+  .hero-section p {
+    font-size: 0.8rem;
   }
 }
 </style>

@@ -81,8 +81,6 @@
                 border: '1px solid #ddd',
                 borderRadius: '4px'
               }" />
-              <!-- <vue-ueditor-wrap v-model="postForm.content" editor-id="editor" :config="editorConfig"
-                :editorDependencies="['ueditor.config.js', 'ueditor.all.js']" style="height:500px; width: 630px;" /> -->
             </div>
           </el-form-item>
 

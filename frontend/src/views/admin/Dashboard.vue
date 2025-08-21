@@ -345,4 +345,65 @@ onMounted(() => {
   padding: 40px 0;
   text-align: center;
 }
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .app-container {
+    padding: 12px;
+  }
+
+  :deep(.el-row) {
+    margin-left: -8px !important;
+    margin-right: -8px !important;
+  }
+
+  :deep(.el-col) {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+
+  :deep(.el-col[span="6"]) {
+    width: 100% !important;
+  }
+
+  :deep(.el-col[span="12"]) {
+    width: 100% !important;
+  }
+
+  .stat-card {
+    padding: 6px 0;
+  }
+
+  .stat-icon {
+    width: 48px;
+    height: 48px;
+    margin-right: 12px;
+  }
+
+  .stat-number {
+    font-size: 22px;
+  }
+
+  .post-list, .comment-list {
+    max-height: 260px;
+  }
+
+  .post-item, .comment-item {
+    padding: 10px 0;
+  }
+
+  .post-item:hover, .comment-item:hover {
+    margin: 0;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  :deep(.el-descriptions) {
+    font-size: 12px;
+  }
+
+  :deep(.el-descriptions__body .el-descriptions__table .el-descriptions__cell) {
+    padding: 8px !important;
+  }
+}
 </style>

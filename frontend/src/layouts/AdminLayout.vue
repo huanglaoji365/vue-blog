@@ -22,7 +22,7 @@
     <!-- 已登录时显示管理布局 -->
     <template v-else>
     <!-- Left Sidebar -->
-    <div class="admin-sidebar" :class="{ collapsed: sidebarCollapsed }">
+    <div class="admin-sidebar" :class="{ collapsed: !isMobile && sidebarCollapsed, 'is-mobile': isMobile, open: isMobile && !sidebarCollapsed }">
              <div class="sidebar-header">
          <div class="logo">
            <el-icon size="24"><Setting /></el-icon>
@@ -80,6 +80,14 @@
       </el-menu>
     </div>
     
+    <!-- Mobile Sidebar Overlay -->
+    <div
+      v-if="isMobile"
+      class="sidebar-overlay"
+      :class="{ visible: !sidebarCollapsed }"
+      @click="toggleSidebar"
+    ></div>
+
     <!-- Main Content Area -->
     <div class="admin-main">
       <!-- Top Header -->
@@ -136,7 +144,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
@@ -163,6 +171,7 @@ const authStore = useAuthStore()
 const appStore = useAppStore()
 
 const sidebarCollapsed = ref(false)
+const isMobile = ref(false)
 
 const { user } = authStore
 const { refreshKey } = storeToRefs(appStore)
@@ -184,8 +193,6 @@ const toggleSidebar = () => {
   sidebarCollapsed.value = !sidebarCollapsed.value
   localStorage.setItem('sidebarCollapsed', sidebarCollapsed.value.toString())
 }
-
-
 
 // 处理用户下拉菜单命令
 const handleUserCommand = async (command) => {
@@ -209,13 +216,37 @@ const handleUserCommand = async (command) => {
 
 
 
+const updateIsMobile = () => {
+  isMobile.value = window.innerWidth <= 768
+  // 在移动端默认收起侧边栏
+  if (isMobile.value) {
+    sidebarCollapsed.value = true
+  }
+}
+
 onMounted(() => {
   // 恢复侧边栏状态
   const collapsed = localStorage.getItem('sidebarCollapsed')
   if (collapsed !== null) {
     sidebarCollapsed.value = collapsed === 'true'
   }
+  updateIsMobile()
+  window.addEventListener('resize', updateIsMobile)
 })
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateIsMobile)
+})
+
+// 路由变化时在移动端自动收起侧边栏
+watch(
+  () => route.path,
+  () => {
+    if (isMobile.value) {
+      sidebarCollapsed.value = true
+    }
+  }
+)
 </script>
 
 <style scoped>
@@ -378,12 +409,36 @@ onMounted(() => {
 
 /* 响应式设计 */
 @media (max-width: 768px) {
-  .admin-sidebar {
+  .admin-sidebar.is-mobile {
     position: fixed;
-    z-index: 1000;
+    z-index: 1001;
     height: 100vh;
+    left: 0;
+    top: 0;
+    transform: translateX(-100%);
+    width: 240px;
+    transition: transform 0.3s ease;
   }
-  
+
+  .admin-sidebar.is-mobile.open {
+    transform: translateX(0);
+  }
+
+  .sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .sidebar-overlay.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
   .admin-main {
     margin-left: 0;
     width: 100%;

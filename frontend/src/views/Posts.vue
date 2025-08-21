@@ -65,7 +65,12 @@
                       </div>
                     </div>
 
-                    <p class="post-excerpt">{{ post.excerpt }}</p>
+                    <!-- 封面图片 -->
+                    <div class="post-cover">
+                      <img v-lazy="'http://localhost:5173' + post.coverImage" :alt="post.title" />
+                    </div>
+
+                    <!-- <p class="post-excerpt">{{ post.excerpt }}</p> -->
 
                     <div class="post-footer">
                       <div class="tags">
@@ -410,6 +415,28 @@ onUnmounted(() => {
   margin-bottom: 15px;
 }
 
+/* 文章封面图片样式 */
+.post-cover {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-height: 25vw;
+  overflow: hidden;
+  border-radius: 8px;
+  margin: 15px 0;
+}
+
+.post-cover img {
+  width: 100%;
+  height: auto;
+  transition: all 0.5s ease-out 0.1s;
+  object-fit: cover;
+}
+
+.post-cover:hover img {
+  transform: scale(1.05);
+}
+
 .post-footer {
   display: flex;
   justify-content: space-between;
@@ -579,6 +606,12 @@ onUnmounted(() => {
 
   .search-bar {
     width: 100%;
+  }
+
+  /* 移动端封面图片样式调整 */
+  .post-cover {
+    max-height: 30vw;
+    margin: 12px 0;
   }
 }
 </style>

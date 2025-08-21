@@ -10,7 +10,7 @@
         <el-icon class="search-icon"><Search /></el-icon>
         <span class="search-placeholder">{{ placeholder }}</span>
         <div class="search-shortcuts">
-          <kbd class="shortcut-key">⌘</kbd>
+          <kbd class="shortcut-key">CTRL</kbd>
           <kbd class="shortcut-key">K</kbd>
         </div>
       </div>

@@ -1,6 +1,6 @@
 <template>
   <div class="header-container">
-    <el-header class="header">
+    <el-header class="header" id="scrolldisplay">
       <div class="container">
         <div class="header-content">
           <!-- 移动端侧边栏按钮 -->
@@ -17,9 +17,18 @@
           <!-- 桌面端导航菜单 -->
           <el-menu :default-active="activeIndex" mode="horizontal" class="nav-menu desktop-nav" router :ellipsis="false">
             <el-menu-item v-for="item in menuList" :key="item.index" :index="item.index">
+              <span :class="['tab-icon', 'iconfont', item.icon]"></span>
               {{ item.label }}
             </el-menu-item>
           </el-menu>
+          
+          <!-- 桌面端搜索栏 -->
+          <div class="page-header desktop-search" @click.stop>
+            <div class="search-bar" @click.stop>
+              <CustomSearch />
+            </div>
+          </div>
+
           <!-- 桌面端用户操作 -->
           <div class="user-actions desktop-user" @click.stop>
             <template v-if="isAuthenticated && user">
@@ -49,12 +58,6 @@
                 注册
               </el-button>
             </template>
-          </div>
-          <!-- 桌面端搜索栏 -->
-          <div class="page-header desktop-search" @click.stop>
-            <div class="search-bar" @click.stop>
-              <CustomSearch />
-            </div>
           </div>
         </div>
       </div>
@@ -124,7 +127,7 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch, onBeforeMount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { storeToRefs } from 'pinia'
@@ -148,8 +151,12 @@ const activeIndex = computed(() => {
 })
 
 const menuList = [
-  { index: '/', label: '首页' },
-  { index: '/posts', label: '文章' },
+  { index: '/', label: '首页', icon: 'icon-shouye' },
+  { index: '/posts', label: '文章', icon: 'icon-jilu' },
+  { index: '/works', label: '实战', icon: 'icon-gongzuotai' },
+  { index: '/records', label: '记录', icon: 'icon-jilu' },
+  { index: '/interactions', label: '互动', icon: 'icon-jiaoliu' },
+  { index: '/abouts', label: '关于', icon: 'icon-cuowutishi-copy' },
 ]
 
 const handleCommand = (command) => {
@@ -169,6 +176,33 @@ const toggleHeader = () => {
   console.log('Header expanded:', isExpanded.value)
 }
 
+// 页面滚动菜单栏显隐
+const scrollBody = () => {
+  let scrollheight = 0;
+  // 监听滚动
+  window.onscroll = function () {
+    // 页面实际滚动距离t
+    let t = document.documentElement.scrollTop || document.body.scrollTop;
+    let scrollup = document.getElementById("scrolldisplay");
+    if (t >= 300) {
+      if (t - scrollheight < 0) {
+        scrollup.style.marginTop = "0";
+        scrollheight = t;
+      } else {
+        scrollup.style.marginTop = "-3.2rem";
+        scrollheight = t;
+      }
+    } else {
+      scrollup.style.marginTop = "0";
+      scrollheight = t;
+    }
+  };
+};
+
+onBeforeMount(() => {
+  scrollBody();
+});
+
 // 监听路由变化，自动折叠侧边栏
 watch(route, () => {
   if (isExpanded.value) {
@@ -180,6 +214,13 @@ watch(route, () => {
 <style scoped>
 .header-container {
   position: relative;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  min-width: 1300px;
 }
 
 .header {
@@ -201,8 +242,11 @@ watch(route, () => {
   height: 100%;
   position: relative;
   min-height: 60px;
-  gap: 16px;
-  flex-wrap: wrap;
+  gap: 0;
+  flex-wrap: nowrap;
+  width: 100%;
+  justify-content: flex-start;
+  padding: 0 10px;
 }
 
 .logo a {
@@ -210,6 +254,8 @@ watch(route, () => {
   color: var(--primary-color);
   transition: all 0.3s ease;
   display: block;
+  width: 150px;
+  margin-right: 20px;
 }
 
 .logo a:hover {
@@ -228,10 +274,13 @@ watch(route, () => {
 }
 
 .nav-menu {
-  min-width: 180px;
-  margin-left: 20px;
+  min-width: 500px;
+  max-width: 600px;
+  margin-left: 0;
   border-bottom: none;
   flex-shrink: 0;
+  margin-right: 20px;
+  overflow: visible;
 }
 
 /* 移除菜单项的焦点边框 */
@@ -247,6 +296,11 @@ watch(route, () => {
 .nav-menu .el-menu-item {
   border: none !important;
   position: relative;
+  padding: 0 20px !important;
+  margin: 0 2px;
+  white-space: nowrap;
+  min-width: 80px;
+  text-align: center;
 }
 
 .nav-menu .el-menu-item:hover {
@@ -271,21 +325,38 @@ watch(route, () => {
   border-radius: 2px;
 }
 
-.user-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-left: auto;
-  flex-shrink: 0;
-}
-
 /* PC端用户操作区域样式 */
 .desktop-user .user-actions {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-left: auto;
+  margin-left: 0;
   flex-shrink: 0;
+  width: 250px;
+  margin-right: 20px;
+  position: relative;
+  z-index: 10;
+}
+
+/* 移除用户操作区域的焦点样式 */
+.desktop-user .user-actions :deep(.el-button:focus) {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.desktop-user .user-actions :deep(.el-button:focus-visible) {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.desktop-user .user-actions :deep(.el-dropdown:focus) {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.desktop-user .user-actions :deep(.el-dropdown:focus-visible) {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 /* PC端未登录按钮样式 */
@@ -306,30 +377,100 @@ watch(route, () => {
   background: rgba(248, 250, 252, 0.8);
 }
 
+/* 移除用户信息的焦点样式 */
+.user-info:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.user-info:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 .username {
   font-weight: 500;
   margin-left: 4px;
+}
+
+/* 移除头像的焦点样式 */
+.desktop-user .user-actions :deep(.el-avatar:focus) {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.desktop-user .user-actions :deep(.el-avatar:focus-visible) {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* 移除下拉箭头的焦点样式 */
+.desktop-user .user-actions :deep(.el-icon:focus) {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.desktop-user .user-actions :deep(.el-icon:focus-visible) {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 .page-header {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: auto;
-  margin: 0 20px;
-  min-width: 0;
+  width: 100%;
+  margin: 0;
 }
 
 .search-bar {
-   width: 300px;
-   max-width: 300px;
-   flex-shrink: 0;
- }
+  width: 100%;
+  flex-shrink: 0;
+}
 
 /* PC端搜索栏样式 - 显示在用户信息左侧 */
 .desktop-search {
-  margin-right: 10px;
+  margin: 0;
   flex-shrink: 0;
+  width: 300px;
+}
+
+/* 搜索框样式 */
+.desktop-search :deep(.el-input__wrapper) {
+  box-shadow: none !important;
+  background-color: rgba(248, 250, 252, 0.8);
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.desktop-search :deep(.el-input__wrapper:hover) {
+  background-color: rgba(64, 158, 255, 0.05);
+  transition: background-color 0.3s ease;
+}
+
+.desktop-search :deep(.el-input__wrapper.is-focus) {
+  box-shadow: none !important;
+  background-color: rgba(64, 158, 255, 0.1);
+  border: 1px solid rgba(64, 158, 255, 0.3) !important;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.desktop-search :deep(.el-input__inner) {
+  background: transparent !important;
+  color: var(--text-color);
+  font-size: 14px;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.desktop-search :deep(.el-input__inner:focus) {
+  outline: none !important;
+  border: none !important;
+}
+
+.desktop-search :deep(.el-input__inner::placeholder) {
+  color: var(--text-color-secondary);
 }
 
    /* 移动端展开/收起按钮 */
@@ -481,6 +622,7 @@ watch(route, () => {
   }
 
   .logo h1 {
+    text-align: center;
     font-size: 22px;
     background: linear-gradient(135deg, var(--primary-color) 0%, #67c23a 100%);
     -webkit-background-clip: text;
@@ -764,6 +906,13 @@ watch(route, () => {
 
 .login-btn, .register-btn {
   width: 100%;
+}
+
+.tab-icon.iconfont {
+  margin-right: 0.4rem !important;
+  display: inline-block;
+  width: 16px;
+  text-align: center;
 }
 
 /* 小屏幕侧边栏优化 */

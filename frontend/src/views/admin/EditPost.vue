@@ -93,17 +93,13 @@
           </el-form-item>
           
           <el-form-item label="内容" prop="content">
-            <div class="editor-container">
-              <textarea 
-                v-model="postForm.content" 
-                class="markdown-editor"
-                placeholder="请输入文章内容（支持Markdown格式）"
-                rows="20"
-              ></textarea>
-              <div class="editor-preview" v-if="postForm.content">
-                <h4>预览</h4>
-                <div class="markdown-preview" v-html="renderedContent"></div>
-              </div>
+            <div>
+              <GlobalUEditor v-model="postForm.content" :localConfig="{ initialFrameHeight: 300 }" :editorStyle="{
+                maxHeight: '545px',
+                maxWidth: '630px',
+                border: '1px solid #ddd',
+                borderRadius: '4px'
+              }" />
             </div>
           </el-form-item>
           
@@ -124,7 +120,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { api } from '@/utils/api'
 import { ElMessage } from 'element-plus'
-import { marked } from 'marked'
+
 
 import { Plus } from '@element-plus/icons-vue'
 
@@ -162,10 +158,7 @@ const postRules = {
   ]
 }
 
-const renderedContent = computed(() => {
-  if (!postForm.value.content) return ''
-  return marked(postForm.value.content)
-})
+
 
 const fetchCategories = async () => {
   try {
@@ -312,85 +305,7 @@ onMounted(async () => {
   margin: 0 auto;
 }
 
-.editor-container {
-  display: flex;
-  gap: 20px;
-  min-height: 400px;
-}
 
-.markdown-editor {
-  flex: 1;
-  border: 1px solid #dcdfe6;
-  border-radius: 4px;
-  padding: 12px;
-  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-  font-size: 14px;
-  line-height: 1.5;
-  resize: vertical;
-  outline: none;
-}
-
-.markdown-editor:focus {
-  border-color: var(--primary-color);
-}
-
-.editor-preview {
-  flex: 1;
-  border: 1px solid #dcdfe6;
-  border-radius: 4px;
-  padding: 12px;
-  background: #fafafa;
-  overflow-y: auto;
-  max-height: 400px;
-}
-
-.editor-preview h4 {
-  margin: 0 0 12px 0;
-  color: var(--text-color);
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.markdown-preview {
-  font-size: 14px;
-  line-height: 1.6;
-  color: var(--text-color);
-}
-
-.markdown-preview h1,
-.markdown-preview h2,
-.markdown-preview h3,
-.markdown-preview h4,
-.markdown-preview h5,
-.markdown-preview h6 {
-  margin: 16px 0 8px 0;
-  color: var(--text-color);
-}
-
-.markdown-preview p {
-  margin: 8px 0;
-}
-
-.markdown-preview code {
-  background: #f1f1f1;
-  padding: 2px 4px;
-  border-radius: 3px;
-  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-}
-
-.markdown-preview pre {
-  background: #f1f1f1;
-  padding: 12px;
-  border-radius: 4px;
-  overflow-x: auto;
-}
-
-.markdown-preview blockquote {
-  border-left: 4px solid #ddd;
-  margin: 8px 0;
-  padding-left: 12px;
-  color: #666;
-}
 
 .image-upload-container {
   display: flex;
@@ -435,10 +350,6 @@ onMounted(async () => {
 }
 
 @media (max-width: 768px) {
-  .editor-container {
-    flex-direction: column;
-  }
-  
   .page-header {
     flex-direction: column;
     gap: 20px;

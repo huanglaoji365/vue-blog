@@ -10,6 +10,9 @@
       </div>
       <div v-else class="post-detail-card">
         <h1 class="post-title">{{ post.title }}</h1>
+        <div class="item-img">
+          <img v-lazy="'http://localhost:5173' + post.coverImage" :alt="post.title" />
+        </div>
         <div class="post-meta">
           <el-avatar :size="32" :src="post.author?.avatar">
             {{ post.author?.username?.charAt(0) }}
@@ -25,26 +28,19 @@
           <el-tag type="info" size="small">{{ post.category.name }}</el-tag>
         </div>
         <div class="post-content" v-html="postHtml"></div>
-        
+
         <!-- 评论区 -->
         <div class="comments-section">
           <h3 class="comments-title">评论 ({{ comments.total || 0 }})</h3>
-          
+
           <!-- 发表评论 -->
           <div class="comment-form" v-if="isAuthenticated">
             <el-avatar :size="40" :src="user?.avatar" class="user-avatar">
               {{ user?.username?.charAt(0) }}
             </el-avatar>
             <div class="form-content">
-              <el-input
-                v-model="newComment"
-                type="textarea"
-                :rows="3"
-                placeholder="写下你的评论..."
-                :maxlength="1000"
-                show-word-limit
-                @keydown.ctrl.enter="submitComment"
-              />
+              <el-input v-model="newComment" type="textarea" :rows="3" placeholder="写下你的评论..." :maxlength="1000"
+                show-word-limit @keydown.ctrl.enter="submitComment" />
               <div class="form-actions">
                 <el-button type="primary" @click="submitComment" :loading="submitting">
                   发表评论
@@ -52,14 +48,14 @@
               </div>
             </div>
           </div>
-          
+
           <!-- 未登录提示 -->
           <div v-else class="login-prompt">
             <el-button type="primary" @click="$router.push('/login')">
               登录后发表评论
             </el-button>
           </div>
-          
+
           <!-- 评论列表 -->
           <div class="comments-list" v-if="comments.comments && comments.comments.length > 0">
             <div v-for="comment in comments.comments" :key="comment._id" class="comment-item">
@@ -72,43 +68,25 @@
                   <span class="comment-date">{{ formatDate(comment.createdAt) }}</span>
                 </div>
                 <div class="comment-actions">
-                                     <el-button 
-                     type="text" 
-                     size="small" 
-                     @click="handleLikeComment(comment)"
-                     :class="{ 'liked': comment.likes?.includes(user?._id) }"
-                   >
-                     👍 {{ comment.likes?.length || 0 }}
-                   </el-button>
-                  <el-button 
-                    type="text" 
-                    size="small" 
-                    @click="showReplyForm(comment._id)"
-                  >
+                  <el-button type="text" size="small" @click="handleLikeComment(comment)"
+                    :class="{ 'liked': comment.likes?.includes(user?._id) }">
+                    👍 {{ comment.likes?.length || 0 }}
+                  </el-button>
+                  <el-button type="text" size="small" @click="showReplyForm(comment._id)">
                     回复
                   </el-button>
-                  <el-button 
-                    v-if="canDeleteComment(comment)"
-                    type="text" 
-                    size="small" 
-                    @click="handleDeleteComment(comment._id)"
-                  >
+                  <el-button v-if="canDeleteComment(comment)" type="text" size="small"
+                    @click="handleDeleteComment(comment._id)">
                     删除
                   </el-button>
                 </div>
               </div>
               <div class="comment-content">{{ comment.content }}</div>
-              
+
               <!-- 回复表单 -->
               <div v-if="replyingTo === comment._id" class="reply-form">
-                <el-input
-                  v-model="replyContent"
-                  type="textarea"
-                  :rows="2"
-                  placeholder="写下你的回复..."
-                  :maxlength="1000"
-                  show-word-limit
-                />
+                <el-input v-model="replyContent" type="textarea" :rows="2" placeholder="写下你的回复..." :maxlength="1000"
+                  show-word-limit />
                 <div class="reply-actions">
                   <el-button size="small" @click="cancelReply">取消</el-button>
                   <el-button type="primary" size="small" @click="submitReply(comment._id)" :loading="submitting">
@@ -116,7 +94,7 @@
                   </el-button>
                 </div>
               </div>
-              
+
               <!-- 回复列表 -->
               <div v-if="comment.replies && comment.replies.length > 0" class="replies-list">
                 <div v-for="reply in comment.replies" :key="reply._id" class="reply-item">
@@ -129,20 +107,12 @@
                       <span class="reply-date">{{ formatDate(reply.createdAt) }}</span>
                     </div>
                     <div class="reply-actions">
-                                             <el-button 
-                         type="text" 
-                         size="small" 
-                         @click="handleLikeComment(reply)"
-                         :class="{ 'liked': reply.likes?.includes(user?._id) }"
-                       >
-                         👍 {{ reply.likes?.length || 0 }}
-                       </el-button>
-                      <el-button 
-                        v-if="canDeleteComment(reply)"
-                        type="text" 
-                        size="small" 
-                        @click="handleDeleteComment(reply._id)"
-                      >
+                      <el-button type="text" size="small" @click="handleLikeComment(reply)"
+                        :class="{ 'liked': reply.likes?.includes(user?._id) }">
+                        👍 {{ reply.likes?.length || 0 }}
+                      </el-button>
+                      <el-button v-if="canDeleteComment(reply)" type="text" size="small"
+                        @click="handleDeleteComment(reply._id)">
                         删除
                       </el-button>
                     </div>
@@ -151,19 +121,14 @@
                 </div>
               </div>
             </div>
-            
+
             <!-- 分页 -->
             <div class="pagination-wrapper" v-if="comments.totalPages > 1">
-              <el-pagination
-                v-model:current-page="currentPage"
-                :page-size="pageSize"
-                :total="comments.total"
-                layout="prev, pager, next"
-                @current-change="loadComments"
-              />
+              <el-pagination v-model:current-page="currentPage" :page-size="pageSize" :total="comments.total"
+                layout="prev, pager, next" @current-change="loadComments" />
             </div>
           </div>
-          
+
           <!-- 空评论状态 -->
           <div v-else class="empty-comments">
             <el-empty description="暂无评论，快来发表第一条评论吧！" />
@@ -182,7 +147,7 @@ import { useCommentsApi } from '@/hooks/useCommentsApi'
 import { useAuthStore } from '@/stores/auth'
 import Header from '@/components/Header.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { marked } from 'marked'
+
 
 
 const route = useRoute()
@@ -206,7 +171,7 @@ const formatDate = (dateString) => {
   return new Date(dateString).toLocaleString('zh-CN')
 }
 
-const postHtml = computed(() => post.value ? marked.parse(post.value.content || '') : '')
+const postHtml = computed(() => post.value ? post.value.content || '' : '')
 
 // 加载评论
 const loadComments = async (page = 1) => {
@@ -228,7 +193,7 @@ const submitComment = async () => {
     ElMessage.warning('请输入评论内容')
     return
   }
-  
+
   submitting.value = true
   try {
     await createComment({
@@ -267,7 +232,7 @@ const submitReply = async (commentId) => {
     ElMessage.warning('请输入回复内容')
     return
   }
-  
+
   submitting.value = true
   try {
     await createComment({
@@ -293,7 +258,7 @@ const handleDeleteComment = async (commentId) => {
       cancelButtonText: '取消',
       type: 'warning'
     })
-    
+
     await deleteComment(commentId)
     ElMessage.success('评论删除成功')
     await loadComments(currentPage.value)
@@ -310,7 +275,7 @@ const handleLikeComment = async (comment) => {
     ElMessage.warning('请先登录')
     return
   }
-  
+
   try {
     await likeComment(comment._id)
     // 重新加载评论以更新点赞状态
@@ -346,23 +311,27 @@ onMounted(async () => {
   min-height: 100vh;
   background: var(--background-color);
 }
+
 .container {
   max-width: 900px;
   margin: 0 auto;
   padding: 40px 20px;
 }
+
 .post-detail-card {
   background: white;
   border-radius: 10px;
-  box-shadow: 0 2px 12px 0 rgba(0,0,0,0.08);
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.08);
   padding: 40px 32px;
 }
+
 .post-title {
   font-size: 2.2rem;
   font-weight: bold;
   margin-bottom: 20px;
   color: var(--text-color);
 }
+
 .post-meta {
   display: flex;
   align-items: center;
@@ -371,21 +340,28 @@ onMounted(async () => {
   color: var(--text-color-secondary);
   margin-bottom: 18px;
 }
+
 .author {
   font-weight: 500;
 }
-.date, .views {
+
+.date,
+.views {
   color: var(--text-color-secondary);
 }
+
 .post-tags {
   margin-bottom: 12px;
 }
+
 .tag {
   margin-right: 8px;
 }
+
 .post-category {
   margin-bottom: 18px;
 }
+
 .post-content {
   color: var(--text-color-regular);
   line-height: 1.8;
@@ -393,9 +369,230 @@ onMounted(async () => {
   word-break: break-all;
   margin-bottom: 40px;
 }
+
+/* 文章内容中的图片样式 */
+.post-content :deep(img) {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin: 20px 0;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* 图片悬停效果 */
+.post-content :deep(img:hover) {
+  transform: scale(1.02);
+  transition: transform 0.3s ease;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* 文章内容中的段落样式 */
+.post-content :deep(p) {
+  margin: 16px 0;
+  line-height: 1.8;
+}
+
+/* 文章内容中的标题样式 */
+.post-content :deep(h1),
+.post-content :deep(h2),
+.post-content :deep(h3),
+.post-content :deep(h4),
+.post-content :deep(h5),
+.post-content :deep(h6) {
+  margin: 24px 0 16px 0;
+  color: var(--text-color);
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.post-content :deep(h1) {
+  font-size: 1.8rem;
+}
+
+.post-content :deep(h2) {
+  font-size: 1.6rem;
+}
+
+.post-content :deep(h3) {
+  font-size: 1.4rem;
+}
+
+.post-content :deep(h4) {
+  font-size: 1.2rem;
+}
+
+.post-content :deep(h5) {
+  font-size: 1.1rem;
+}
+
+.post-content :deep(h6) {
+  font-size: 1rem;
+}
+
+/* 文章内容中的链接样式 */
+.post-content :deep(a) {
+  color: #409eff;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-bottom-color 0.3s ease;
+}
+
+.post-content :deep(a:hover) {
+  border-bottom-color: #409eff;
+}
+
+/* 文章内容中的代码样式 */
+.post-content :deep(code) {
+  background: #f5f5f5;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.9em;
+  color: #e74c3c;
+}
+
+.post-content :deep(pre) {
+  background: #f8f9fa;
+  padding: 16px;
+  border-radius: 8px;
+  overflow-x: auto;
+  border: 1px solid #e9ecef;
+  margin: 20px 0;
+}
+
+.post-content :deep(pre code) {
+  background: none;
+  padding: 0;
+  color: inherit;
+}
+
+/* 文章内容中的引用样式 */
+.post-content :deep(blockquote) {
+  border-left: 4px solid #409eff;
+  margin: 20px 0;
+  padding: 16px 20px;
+  background: #f8f9fa;
+  border-radius: 0 8px 8px 0;
+  font-style: italic;
+  color: #666;
+}
+
+/* 文章内容中的表格样式 */
+.post-content :deep(table) {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.post-content :deep(th),
+.post-content :deep(td) {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.post-content :deep(th) {
+  background: #f8f9fa;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.post-content :deep(tr:hover) {
+  background: #f8f9fa;
+}
+
+/* 文章内容中的列表样式 */
+.post-content :deep(ul),
+.post-content :deep(ol) {
+  margin: 16px 0;
+  padding-left: 24px;
+}
+
+.post-content :deep(li) {
+  margin: 8px 0;
+  line-height: 1.6;
+}
+
+
+
+.item-img {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-height: 30vw;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+.item-img img {
+  width: 100%;
+  transition: all 0.5s ease-out 0.1s;
+}
+
+
+.item-img:hover img {
+  transform: scale(1.1);
+}
+
+@media not screen and (min-width: 60em) {
+  .item-img {
+    max-height: 30vw;
+  }
+}
+
+@media not screen and (min-width: 50em) {
+  .item-img {
+    max-height: 30vw;
+  }
+}
+
+
+/* 响应式图片处理 */
+@media (max-width: 768px) {
+  .item-img {
+    max-height: 30vw;
+  }
+
+  .post-content :deep(img) {
+    margin: 16px 0;
+    border-radius: 6px;
+  }
+
+  .post-content :deep(h1) {
+    font-size: 1.6rem;
+  }
+
+  .post-content :deep(h2) {
+    font-size: 1.4rem;
+  }
+
+  .post-content :deep(h3) {
+    font-size: 1.2rem;
+  }
+
+  .post-content :deep(h4) {
+    font-size: 1.1rem;
+  }
+
+  .post-content :deep(h5) {
+    font-size: 1rem;
+  }
+
+  .post-content :deep(h6) {
+    font-size: 0.9rem;
+  }
+}
+
 .loading {
   padding: 40px 0;
 }
+
 .empty {
   padding: 60px 0;
   text-align: center;
@@ -406,12 +603,14 @@ onMounted(async () => {
   border-top: 1px solid #eee;
   padding-top: 30px;
 }
+
 .comments-title {
   font-size: 1.5rem;
   font-weight: 600;
   margin-bottom: 20px;
   color: var(--text-color);
 }
+
 .comment-form {
   display: flex;
   gap: 16px;
@@ -420,16 +619,20 @@ onMounted(async () => {
   background: #f8f9fa;
   border-radius: 8px;
 }
+
 .user-avatar {
   flex-shrink: 0;
 }
+
 .form-content {
   flex: 1;
 }
+
 .form-actions {
   margin-top: 12px;
   text-align: right;
 }
+
 .login-prompt {
   text-align: center;
   padding: 20px;
@@ -437,9 +640,11 @@ onMounted(async () => {
   border-radius: 8px;
   margin-bottom: 30px;
 }
+
 .comments-list {
   margin-top: 20px;
 }
+
 .comment-item {
   margin-bottom: 24px;
   padding: 16px;
@@ -447,94 +652,113 @@ onMounted(async () => {
   border-radius: 8px;
   background: #fff;
 }
+
 .comment-header {
   display: flex;
   align-items: center;
   gap: 12px;
   margin-bottom: 12px;
 }
+
 .comment-info {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
+
 .comment-author {
   font-weight: 500;
   color: var(--text-color);
 }
+
 .comment-date {
   font-size: 0.875rem;
   color: var(--text-color-secondary);
 }
+
 .comment-actions {
   display: flex;
   gap: 8px;
 }
+
 .comment-content {
   color: var(--text-color-regular);
   line-height: 1.6;
   margin-bottom: 12px;
 }
+
 .reply-form {
   margin: 12px 0;
   padding: 12px;
   background: #f8f9fa;
   border-radius: 6px;
 }
+
 .reply-actions {
   margin-top: 8px;
   text-align: right;
 }
+
 .replies-list {
   margin-top: 12px;
   padding-left: 20px;
   border-left: 2px solid #eee;
 }
+
 .reply-item {
   margin-bottom: 12px;
   padding: 12px;
   background: #f8f9fa;
   border-radius: 6px;
 }
+
 .reply-header {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-bottom: 8px;
 }
+
 .reply-info {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
+
 .reply-author {
   font-weight: 500;
   font-size: 0.875rem;
   color: var(--text-color);
 }
+
 .reply-date {
   font-size: 0.75rem;
   color: var(--text-color-secondary);
 }
+
 .reply-actions {
   display: flex;
   gap: 4px;
 }
+
 .reply-content {
   color: var(--text-color-regular);
   line-height: 1.5;
   font-size: 0.875rem;
 }
+
 .pagination-wrapper {
   margin-top: 20px;
   text-align: center;
 }
+
 .empty-comments {
   padding: 40px 0;
   text-align: center;
 }
+
 .liked {
   color: #409eff;
 }

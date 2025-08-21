@@ -61,6 +61,7 @@ const mergedConfig = computed(() => {
 			disableUpload: false,
 			disableOnline: false
 		},
+
 		// 通过请求头传递鉴权信息，避免URL缺少token
 		serverHeaders: token ? { Authorization: `Bearer ${token}` } : {},
 		// AI 工具栏：对接 ChatAnywhere OpenAI 兼容接口
@@ -90,3 +91,6 @@ const editorDependencies = computed(() => [
 	'third-party/webuploader/webuploader.css'
 ])
 </script>
+
+<style scoped>
+</style>

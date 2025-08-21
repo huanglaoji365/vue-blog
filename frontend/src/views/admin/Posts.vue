@@ -377,4 +377,34 @@ onMounted(() => {
 .fixed-width {
   width: 200px;
 }
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .app-container {
+    padding: 12px;
+  }
+
+  :deep(.el-form--inline) .el-form-item {
+    margin-right: 8px;
+    margin-bottom: 8px;
+  }
+
+  :deep(.el-form--inline) .el-input,
+  :deep(.el-form--inline) .el-select {
+    width: 160px !important;
+  }
+
+  :deep(.el-row.mb8) .el-button + .el-button {
+    margin-left: 8px;
+  }
+
+  :deep(.el-table) {
+    font-size: 12px;
+  }
+
+  :deep(.el-table .cell) {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+}
 </style>
